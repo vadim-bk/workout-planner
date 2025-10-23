@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { parseWorkoutPlan } from '@/lib/parsers/workoutParser';
 import { generateWeightSuggestions } from '@/lib/openai/suggestions';
 import { WeeklyPlan, WorkoutHistory } from '@/types';
@@ -22,11 +23,18 @@ export function NewPlanPage() {
   const [parsedPlan, setParsedPlan] = useState<WeeklyPlan | null>(null);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleParse = () => {
     if (!rawText || !weekStart || !weekEnd || !user) return;
 
+    setError(null);
     const days = parseWorkoutPlan(rawText);
+    
+    if (days.length === 0) {
+      setError('Не вдалося розпізнати план. Переконайтеся, що текст містить "День 1", "День 2" тощо.');
+      return;
+    }
     
     const plan: WeeklyPlan = {
       id: '',
@@ -97,7 +105,7 @@ export function NewPlanPage() {
       navigate('/');
     } catch (error) {
       console.error('Error saving plan:', error);
-      alert('Помилка при збереженні плану. Перевірте налаштування OpenAI API.');
+      setError('Помилка при збереженні плану. Перевірте налаштування Firebase та OpenAI API.');
     } finally {
       setIsGeneratingAI(false);
       setIsSaving(false);
@@ -113,6 +121,12 @@ export function NewPlanPage() {
             Вставте текст плану від вашого тренера
           </p>
         </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <Card>
           <CardHeader>

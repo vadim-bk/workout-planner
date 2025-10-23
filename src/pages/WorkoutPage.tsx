@@ -7,6 +7,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WeeklyPlan, DayWorkout, CompletedExercise, AISuggestion } from '@/types';
 import { Save, ChevronLeft, Sparkles } from 'lucide-react';
 
@@ -20,6 +21,7 @@ export function WorkoutPage() {
   const [suggestions, setSuggestions] = useState<Map<string, AISuggestion>>(new Map());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     loadWorkout();
@@ -122,6 +124,7 @@ export function WorkoutPage() {
     if (!plan || !dayWorkout || !user) return;
 
     setSaving(true);
+    setSaveSuccess(false);
 
     try {
       const historyRef = collection(db, 'workout_history');
@@ -133,8 +136,8 @@ export function WorkoutPage() {
         exercises: completedExercises,
       });
 
-      alert('Тренування збережено! 💪');
-      navigate('/');
+      setSaveSuccess(true);
+      setTimeout(() => navigate('/'), 1500);
     } catch (error) {
       console.error('Error saving workout:', error);
       alert('Помилка при збереженні тренування');
@@ -169,11 +172,19 @@ export function WorkoutPage() {
               </p>
             )}
           </div>
-          <Button onClick={handleSave} disabled={saving} size="lg">
+          <Button onClick={handleSave} disabled={saving || saveSuccess} size="lg">
             <Save className="mr-2 h-5 w-5" />
-            Зберегти тренування
+            {saveSuccess ? 'Збережено! ✓' : 'Зберегти тренування'}
           </Button>
         </div>
+
+        {saveSuccess && (
+          <Alert variant="success">
+            <AlertDescription>
+              Тренування успішно збережено! Перенаправлення... 💪
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="space-y-4">
           {completedExercises.map((exercise, exerciseIdx) => {

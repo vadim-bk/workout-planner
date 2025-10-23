@@ -1,14 +1,27 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
-import { useAuth } from '@/contexts/AuthContext';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { WeeklyPlan } from '@/types';
-import { Plus, Dumbbell, Calendar, History as HistoryIcon } from 'lucide-react';
-import { formatShortDate } from '@/lib/utils';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { useAuth } from "@/contexts/AuthContext";
+import { Layout } from "@/components/layout/Layout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { WeeklyPlan } from "@/types";
+import { Plus, Dumbbell, Calendar, History as HistoryIcon } from "lucide-react";
+import { formatShortDate } from "@/lib/utils";
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -23,11 +36,11 @@ export function Dashboard() {
     if (!user) return;
 
     try {
-      const plansRef = collection(db, 'workout_plans');
+      const plansRef = collection(db, "workout_plans");
       const q = query(
         plansRef,
-        where('userId', '==', user.uid),
-        orderBy('weekStartDate', 'desc'),
+        where("userId", "==", user.uid),
+        orderBy("weekStartDate", "desc"),
         limit(1)
       );
 
@@ -43,7 +56,7 @@ export function Dashboard() {
         } as WeeklyPlan);
       }
     } catch (error) {
-      console.error('Error loading current plan:', error);
+      console.error("Error loading current plan:", error);
     } finally {
       setLoading(false);
     }
@@ -56,7 +69,7 @@ export function Dashboard() {
           <div>
             <h1 className="text-3xl font-bold">Головна</h1>
             <p className="text-muted-foreground mt-1">
-              Вітаємо, {user?.displayName?.split(' ')[0] || 'спортсмене'}! 💪
+              Вітаємо, {user?.displayName?.split(" ")[0] || "спортсмене"}! 💪
             </p>
           </div>
           <Link to="/new-plan">
@@ -78,18 +91,24 @@ export function Dashboard() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-2xl">Поточний план тренувань</CardTitle>
+                    <CardTitle className="text-2xl">
+                      Поточний план тренувань
+                    </CardTitle>
                     <CardDescription className="text-base mt-1">
                       <Calendar className="inline h-4 w-4 mr-1" />
-                      {formatShortDate(currentPlan.weekStartDate)} - {formatShortDate(currentPlan.weekEndDate)}
+                      {formatShortDate(currentPlan.weekStartDate)} -{" "}
+                      {formatShortDate(currentPlan.weekEndDate)}
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
-                  {currentPlan.days.map(day => (
-                    <Link key={day.day} to={`/workout/${currentPlan.id}/${day.day}`}>
+                  {currentPlan.days.map((day) => (
+                    <Link
+                      key={day.day}
+                      to={`/workout/${currentPlan.id}/${day.day}`}
+                    >
                       <Card className="hover:border-primary transition-colors cursor-pointer">
                         <CardHeader>
                           <CardTitle>День {day.day}</CardTitle>
@@ -143,18 +162,10 @@ export function Dashboard() {
                 <CardTitle>Про додаток</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p>
-                  📝 Вставляйте плани тренувань від вашого тренера
-                </p>
-                <p>
-                  🤖 Отримуйте AI підказки для ваги на основі вашої історії
-                </p>
-                <p>
-                  💪 Редагуйте вагу під час тренування
-                </p>
-                <p>
-                  📊 Відстежуйте прогрес з графіками
-                </p>
+                <p>📝 Вставляйте плани тренувань від вашого тренера</p>
+                <p>🤖 Отримуйте AI підказки для ваги на основі вашої історії</p>
+                <p>💪 Редагуйте вагу під час тренування</p>
+                <p>📊 Відстежуйте прогрес з графіками</p>
               </CardContent>
             </Card>
           </div>
@@ -179,4 +190,3 @@ export function Dashboard() {
     </Layout>
   );
 }
-
