@@ -86,7 +86,9 @@ export function NewPlanPage() {
       navigate("/");
     } catch (error) {
       console.error("Error saving plan:", error);
-      setError("Помилка при збереженні плану. Перевірте налаштування Firebase.");
+      setError(
+        "Помилка при збереженні плану. Перевірте налаштування Firebase."
+      );
     } finally {
       setIsSaving(false);
     }
@@ -149,13 +151,20 @@ export function NewPlanPage() {
       navigate("/");
     } catch (error: any) {
       console.error("Error saving plan:", error);
-      
+
       // Better error handling for OpenAI rate limits
-      if (error?.status === 429 || error?.message?.includes("429") || error?.message?.includes("quota")) {
+      if (
+        error?.status === 429 ||
+        error?.message?.includes("429") ||
+        error?.message?.includes("quota")
+      ) {
         setError(
           "❌ OpenAI Rate Limit: У вас закінчилися кредити. Додайте кредити на platform.openai.com/settings/organization/billing або натисніть 'Зберегти без AI' нижче."
         );
-      } else if (error?.message?.includes("OpenAI") || error?.message?.includes("API")) {
+      } else if (
+        error?.message?.includes("OpenAI") ||
+        error?.message?.includes("API")
+      ) {
         setError(
           "❌ Помилка OpenAI API. Перевірте ключ у .env файлі або збережіть без AI підказок."
         );
@@ -303,7 +312,7 @@ export function NewPlanPage() {
                     </>
                   )}
                 </Button>
-                
+
                 <Button
                   onClick={handleSaveWithoutAI}
                   disabled={isSaving}
@@ -314,9 +323,10 @@ export function NewPlanPage() {
                   <Save className="mr-2 h-4 w-4" />
                   Зберегти без AI підказок
                 </Button>
-                
+
                 <p className="text-xs text-muted-foreground text-center">
-                  💡 Підказка: AI підказки можна додати пізніше, або ввести вагу вручну
+                  💡 Підказка: AI підказки можна додати пізніше, або ввести вагу
+                  вручну
                 </p>
               </div>
             </CardContent>
