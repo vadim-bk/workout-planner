@@ -1,25 +1,39 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
-import { useAuth } from '@/contexts/AuthContext';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { parseWorkoutPlan } from '@/lib/parsers/workoutParser';
-import { generateWeightSuggestions } from '@/lib/openai/suggestions';
-import { WeeklyPlan, WorkoutHistory } from '@/types';
-import { Sparkles, Eye } from 'lucide-react';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  orderBy,
+  Timestamp,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { useAuth } from "@/contexts/AuthContext";
+import { Layout } from "@/components/layout/Layout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { parseWorkoutPlan } from "@/lib/parsers/workoutParser";
+import { generateWeightSuggestions } from "@/lib/openai/suggestions";
+import { WeeklyPlan, WorkoutHistory } from "@/types";
+import { Sparkles, Eye, Save } from "lucide-react";
 
 export function NewPlanPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [rawText, setRawText] = useState('');
-  const [weekStart, setWeekStart] = useState('');
-  const [weekEnd, setWeekEnd] = useState('');
+  const [rawText, setRawText] = useState("");
+  const [weekStart, setWeekStart] = useState("");
+  const [weekEnd, setWeekEnd] = useState("");
   const [parsedPlan, setParsedPlan] = useState<WeeklyPlan | null>(null);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -30,14 +44,16 @@ export function NewPlanPage() {
 
     setError(null);
     const days = parseWorkoutPlan(rawText);
-    
+
     if (days.length === 0) {
-      setError('Не вдалося розпізнати план. Переконайтеся, що текст містить "День 1", "День 2" тощо.');
+      setError(
+        'Не вдалося розпізнати план. Переконайтеся, що текст містить "День 1", "День 2" тощо.'
+      );
       return;
     }
-    
+
     const plan: WeeklyPlan = {
-      id: '',
+      id: "",
       userId: user.uid,
       weekStartDate: new Date(weekStart),
       weekEndDate: new Date(weekEnd),
@@ -49,15 +65,43 @@ export function NewPlanPage() {
     setParsedPlan(plan);
   };
 
+  const handleSaveWithoutAI = async () => {
+    if (!parsedPlan || !user) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      // Save the plan to Firestore
+      const plansRef = collection(db, "workout_plans");
+      await addDoc(plansRef, {
+        userId: parsedPlan.userId,
+        weekStartDate: Timestamp.fromDate(parsedPlan.weekStartDate),
+        weekEndDate: Timestamp.fromDate(parsedPlan.weekEndDate),
+        days: parsedPlan.days,
+        rawText: parsedPlan.rawText,
+        createdAt: Timestamp.fromDate(parsedPlan.createdAt),
+      });
+
+      navigate("/");
+    } catch (error) {
+      console.error("Error saving plan:", error);
+      setError("Помилка при збереженні плану. Перевірте налаштування Firebase.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleSaveAndGenerateAI = async () => {
     if (!parsedPlan || !user) return;
 
     setIsGeneratingAI(true);
     setIsSaving(true);
+    setError(null);
 
     try {
       // Save the plan to Firestore
-      const plansRef = collection(db, 'workout_plans');
+      const plansRef = collection(db, "workout_plans");
       const docRef = await addDoc(plansRef, {
         userId: parsedPlan.userId,
         weekStartDate: Timestamp.fromDate(parsedPlan.weekStartDate),
@@ -70,15 +114,15 @@ export function NewPlanPage() {
       const planWithId = { ...parsedPlan, id: docRef.id };
 
       // Load workout history
-      const historyRef = collection(db, 'workout_history');
+      const historyRef = collection(db, "workout_history");
       const historyQuery = query(
         historyRef,
-        where('userId', '==', user.uid),
-        orderBy('date', 'desc')
+        where("userId", "==", user.uid),
+        orderBy("date", "desc")
       );
-      
+
       const historySnapshot = await getDocs(historyQuery);
-      const history: WorkoutHistory[] = historySnapshot.docs.map(doc => ({
+      const history: WorkoutHistory[] = historySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         date: doc.data().date.toDate(),
@@ -88,8 +132,8 @@ export function NewPlanPage() {
       const suggestions = await generateWeightSuggestions(planWithId, history);
 
       // Save suggestions to Firestore
-      const suggestionsRef = collection(db, 'ai_suggestions');
-      const savePromises = Array.from(suggestions.values()).map(suggestion =>
+      const suggestionsRef = collection(db, "ai_suggestions");
+      const savePromises = Array.from(suggestions.values()).map((suggestion) =>
         addDoc(suggestionsRef, {
           userId: suggestion.userId,
           weekPlanId: suggestion.weekPlanId,
@@ -102,10 +146,24 @@ export function NewPlanPage() {
 
       await Promise.all(savePromises);
 
-      navigate('/');
-    } catch (error) {
-      console.error('Error saving plan:', error);
-      setError('Помилка при збереженні плану. Перевірте налаштування Firebase та OpenAI API.');
+      navigate("/");
+    } catch (error: any) {
+      console.error("Error saving plan:", error);
+      
+      // Better error handling for OpenAI rate limits
+      if (error?.status === 429 || error?.message?.includes("429") || error?.message?.includes("quota")) {
+        setError(
+          "❌ OpenAI Rate Limit: У вас закінчилися кредити. Додайте кредити на platform.openai.com/settings/organization/billing або натисніть 'Зберегти без AI' нижче."
+        );
+      } else if (error?.message?.includes("OpenAI") || error?.message?.includes("API")) {
+        setError(
+          "❌ Помилка OpenAI API. Перевірте ключ у .env файлі або збережіть без AI підказок."
+        );
+      } else {
+        setError(
+          "Помилка при збереженні плану. Перевірте налаштування Firebase та OpenAI API."
+        );
+      }
     } finally {
       setIsGeneratingAI(false);
       setIsSaving(false);
@@ -194,12 +252,15 @@ export function NewPlanPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {parsedPlan.days.map(day => (
+                {parsedPlan.days.map((day) => (
                   <div key={day.day} className="border rounded-lg p-4">
                     <h3 className="font-bold text-lg mb-3">День {day.day}</h3>
                     <div className="space-y-2">
                       {day.exercises.map((ex, idx) => (
-                        <div key={ex.id} className="flex items-start gap-2 text-sm">
+                        <div
+                          key={ex.id}
+                          className="flex items-start gap-2 text-sm"
+                        >
                           <span className="font-medium text-muted-foreground min-w-6">
                             {idx + 1}.
                           </span>
@@ -207,9 +268,11 @@ export function NewPlanPage() {
                             <p className="font-medium">{ex.name}</p>
                             <p className="text-muted-foreground">
                               {ex.sets} підходи × {ex.reps} повторень
-                              {ex.type !== 'normal' && ex.type && (
+                              {ex.type !== "normal" && ex.type && (
                                 <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                                  {ex.type === 'superset' ? 'Суперсет' : 'Дропсет'}
+                                  {ex.type === "superset"
+                                    ? "Суперсет"
+                                    : "Дропсет"}
                                 </span>
                               )}
                             </p>
@@ -221,12 +284,12 @@ export function NewPlanPage() {
                 ))}
               </div>
 
-              <div className="mt-6 flex gap-2">
+              <div className="mt-6 flex flex-col gap-3">
                 <Button
                   onClick={handleSaveAndGenerateAI}
                   disabled={isGeneratingAI || isSaving}
                   size="lg"
-                  className="flex-1"
+                  className="w-full"
                 >
                   {isGeneratingAI ? (
                     <>
@@ -240,6 +303,21 @@ export function NewPlanPage() {
                     </>
                   )}
                 </Button>
+                
+                <Button
+                  onClick={handleSaveWithoutAI}
+                  disabled={isSaving}
+                  size="lg"
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  Зберегти без AI підказок
+                </Button>
+                
+                <p className="text-xs text-muted-foreground text-center">
+                  💡 Підказка: AI підказки можна додати пізніше, або ввести вагу вручну
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -248,4 +326,3 @@ export function NewPlanPage() {
     </Layout>
   );
 }
-

@@ -1,7 +1,13 @@
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Chrome } from 'lucide-react';
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Chrome } from "lucide-react";
 
 export function LoginPage() {
   const { signInWithGoogle } = useAuth();
@@ -10,7 +16,9 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">💪 Планувальник Тренувань</CardTitle>
+          <CardTitle className="text-3xl font-bold">
+            💪 Workout Planner
+          </CardTitle>
           <CardDescription className="text-base mt-2">
             Керуйте своїми тренуваннями та відстежуйте прогрес
           </CardDescription>
@@ -21,11 +29,7 @@ export function LoginPage() {
               Увійдіть, щоб почати відстежувати свої тренування
             </p>
           </div>
-          <Button
-            onClick={signInWithGoogle}
-            className="w-full"
-            size="lg"
-          >
+          <Button onClick={signInWithGoogle} className="w-full" size="lg">
             <Chrome className="mr-2 h-5 w-5" />
             Увійти через Google
           </Button>
@@ -39,4 +43,3 @@ export function LoginPage() {
     </div>
   );
 }
-
