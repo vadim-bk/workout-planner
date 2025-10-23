@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Home, Plus, History, LogOut } from "lucide-react";
+import { Home, Plus, History, LogOut, Upload } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -36,6 +36,12 @@ export function Layout({ children }: LayoutProps) {
                 <Button variant="ghost" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Новий план
+                </Button>
+              </Link>
+              <Link to="/import-history">
+                <Button variant="ghost" size="sm">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Імпорт історії
                 </Button>
               </Link>
               <Link to="/history">

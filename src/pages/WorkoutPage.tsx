@@ -49,7 +49,9 @@ export function WorkoutPage() {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [existingWorkout, setExistingWorkout] = useState<WorkoutHistory | null>(null);
+  const [existingWorkout, setExistingWorkout] = useState<WorkoutHistory | null>(
+    null
+  );
 
   useEffect(() => {
     loadWorkout();
@@ -94,7 +96,7 @@ export function WorkoutPage() {
       );
 
       const historySnapshot = await getDocs(historyQuery);
-      
+
       let initialExercises: CompletedExercise[];
 
       if (!historySnapshot.empty) {
@@ -105,7 +107,7 @@ export function WorkoutPage() {
           ...existingWorkoutDoc.data(),
           date: existingWorkoutDoc.data().date.toDate(),
         } as WorkoutHistory;
-        
+
         setExistingWorkout(existingData);
         setIsEditing(false); // Start in view mode if data exists
         initialExercises = existingData.exercises;
@@ -210,7 +212,7 @@ export function WorkoutPage() {
           weekPlanId: plan.id,
           exercises: completedExercises,
         });
-        
+
         // Update existingWorkout state with the new document
         setExistingWorkout({
           id: docRef.id,
@@ -224,7 +226,7 @@ export function WorkoutPage() {
 
       setSaveSuccess(true);
       setIsEditing(false); // Exit edit mode after save
-      
+
       // Clear success message after 2 seconds
       setTimeout(() => setSaveSuccess(false), 2000);
     } catch (error) {
@@ -289,10 +291,7 @@ export function WorkoutPage() {
               </Button>
             </div>
           ) : (
-            <Button
-              onClick={() => setIsEditing(true)}
-              size="lg"
-            >
+            <Button onClick={() => setIsEditing(true)} size="lg">
               <Edit className="mr-2 h-5 w-5" />
               Редагувати
             </Button>
@@ -401,13 +400,19 @@ export function WorkoutPage() {
                           </span>
                           <span className="flex-1">
                             {set.weight > 0 && (
-                              <span className="font-bold text-lg">{set.weight} кг</span>
+                              <span className="font-bold text-lg">
+                                {set.weight} кг
+                              </span>
                             )}
                             {set.weight > 0 && set.reps > 0 && (
-                              <span className="mx-2 text-muted-foreground">×</span>
+                              <span className="mx-2 text-muted-foreground">
+                                ×
+                              </span>
                             )}
                             {set.reps > 0 && (
-                              <span className="font-medium">{set.reps} повторень</span>
+                              <span className="font-medium">
+                                {set.reps} повторень
+                              </span>
                             )}
                             {set.weight === 0 && set.reps === 0 && (
                               <span className="text-muted-foreground italic">

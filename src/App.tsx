@@ -5,6 +5,7 @@ import { Dashboard } from '@/pages/Dashboard';
 import { NewPlanPage } from '@/pages/NewPlanPage';
 import { WorkoutPage } from '@/pages/WorkoutPage';
 import { HistoryPage } from '@/pages/HistoryPage';
+import { ImportHistoryPage } from '@/pages/ImportHistoryPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -65,6 +66,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <HistoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/import-history"
+        element={
+          <ProtectedRoute>
+            <ImportHistoryPage />
           </ProtectedRoute>
         }
       />
