@@ -9,17 +9,23 @@ interface ParsedHistoryWorkout {
 /**
  * Парсить історичні дані тренувань з текстового формату
  * 
- * Очікуваний формат:
- * Дата: 15.10.2024
- * День 1
+ * Новий формат:
+ * Тиждень: 14.10.2024 - 20.10.2024
  * 
+ * День 1
  * 1. Присідання зі штангою
- * Підхід 1: 100 кг × 12 повторень
- * Підхід 2: 100 кг × 10 повторень
+ * 100 кг × 12 повторень
+ * 100 кг × 10 повторень
+ * 100 кг × 8 повторень
  * 
  * 2. Жим ногами
- * Підхід 1: 150 кг × 15 повторень
- * ...
+ * 150 кг × 15 повторень
+ * 150 кг × 12 повторень
+ * 
+ * День 2
+ * 1. Жим штанги лежачи
+ * 80 кг × 12 повторень
+ * 80 кг × 10 повторень
  */
 export function parseHistoryWorkouts(text: string): ParsedHistoryWorkout[] {
   const workouts: ParsedHistoryWorkout[] = [];
@@ -30,84 +36,74 @@ export function parseHistoryWorkouts(text: string): ParsedHistoryWorkout[] {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
   
-  // Розділяємо по датам
-  const dateRegex = /Дата:\s*(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/gi;
-  const dateMatches = [...cleanText.matchAll(dateRegex)];
+  // Шукаємо тижні
+  const weekRegex = /Тиждень:\s*(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})\s*-\s*(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/gi;
+  const weekMatches = [...cleanText.matchAll(weekRegex)];
   
-  if (dateMatches.length === 0) {
-    // Спробуємо інший формат дати
-    const altDateRegex = /(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/g;
-    const altMatches = [...cleanText.matchAll(altDateRegex)];
-    
-    if (altMatches.length === 0) {
-      throw new Error('Не знайдено дат у форматі ДД.ММ.РРРР або Дата: ДД.ММ.РРРР');
-    }
-    
-    // Використовуємо альтернативні дати
-    altMatches.forEach((match, index) => {
-      const day = parseInt(match[1]);
-      const month = parseInt(match[2]);
-      const year = parseInt(match[3]);
-      const date = new Date(year, month - 1, day);
-      
-      const startIndex = match.index!;
-      const endIndex = index < altMatches.length - 1 
-        ? altMatches[index + 1].index! 
-        : cleanText.length;
-      
-      const workoutText = cleanText.substring(startIndex, endIndex);
-      const workout = parseWorkoutBlock(workoutText, date);
-      
-      if (workout) {
-        workouts.push(workout);
-      }
-    });
-  } else {
-    // Використовуємо дати з "Дата:"
-    dateMatches.forEach((match, index) => {
-      const day = parseInt(match[1]);
-      const month = parseInt(match[2]);
-      const year = parseInt(match[3]);
-      const date = new Date(year, month - 1, day);
-      
-      const startIndex = match.index!;
-      const endIndex = index < dateMatches.length - 1 
-        ? dateMatches[index + 1].index! 
-        : cleanText.length;
-      
-      const workoutText = cleanText.substring(startIndex, endIndex);
-      const workout = parseWorkoutBlock(workoutText, date);
-      
-      if (workout) {
-        workouts.push(workout);
-      }
-    });
+  if (weekMatches.length === 0) {
+    throw new Error('Не знайдено тижнів у форматі "Тиждень: ДД.ММ.РРРР - ДД.ММ.РРРР"');
   }
+  
+  weekMatches.forEach((match, weekIndex) => {
+    const startDay = parseInt(match[1]);
+    const startMonth = parseInt(match[2]);
+    const startYear = parseInt(match[3]);
+    const endDay = parseInt(match[4]);
+    const endMonth = parseInt(match[5]);
+    const endYear = parseInt(match[6]);
+    
+    const startDate = new Date(startYear, startMonth - 1, startDay);
+    const endDate = new Date(endYear, endMonth - 1, endDay);
+    
+    const startIndex = match.index!;
+    const endIndex = weekIndex < weekMatches.length - 1 
+      ? weekMatches[weekIndex + 1].index! 
+      : cleanText.length;
+    
+    const weekText = cleanText.substring(startIndex, endIndex);
+    const weekWorkouts = parseWeekBlock(weekText, startDate, endDate);
+    
+    workouts.push(...weekWorkouts);
+  });
   
   return workouts;
 }
 
-function parseWorkoutBlock(text: string, date: Date): ParsedHistoryWorkout | null {
-  // Знаходимо номер дня
-  const dayMatch = text.match(/День\s+(\d+)/i);
-  if (!dayMatch) {
-    return null; // Пропускаємо блоки без дня
+function parseWeekBlock(text: string, startDate: Date, _endDate: Date): ParsedHistoryWorkout[] {
+  const workouts: ParsedHistoryWorkout[] = [];
+  
+  // Розділяємо по днях
+  const dayRegex = /День\s+(\d+)/gi;
+  const dayMatches = [...text.matchAll(dayRegex)];
+  
+  if (dayMatches.length === 0) {
+    return workouts;
   }
   
-  const dayNumber = parseInt(dayMatch[1]);
+  dayMatches.forEach((match, index) => {
+    const dayNumber = parseInt(match[1]);
+    const startIndex = match.index!;
+    const endIndex = index < dayMatches.length - 1 
+      ? dayMatches[index + 1].index! 
+      : text.length;
+    
+    const dayText = text.substring(startIndex, endIndex);
+    const exercises = parseHistoryExercises(dayText);
+    
+    if (exercises.length > 0) {
+      // Розраховуємо дату на основі дня тижня
+      const workoutDate = new Date(startDate);
+      workoutDate.setDate(startDate.getDate() + (dayNumber - 1));
+      
+      workouts.push({
+        date: workoutDate,
+        dayNumber,
+        exercises,
+      });
+    }
+  });
   
-  // Парсимо вправи
-  const exercises = parseHistoryExercises(text);
-  
-  if (exercises.length === 0) {
-    return null;
-  }
-  
-  return {
-    date,
-    dayNumber,
-    exercises,
-  };
+  return workouts;
 }
 
 function parseHistoryExercises(text: string): CompletedExercise[] {
@@ -125,7 +121,7 @@ function parseHistoryExercises(text: string): CompletedExercise[] {
     // Перевіряємо чи це нова вправа (1. Назва вправи)
     const exerciseMatch = line.match(/^(\d+)\.\s+(.+)/);
     
-    if (exerciseMatch && !line.includes('Підхід')) {
+    if (exerciseMatch && !line.includes('кг') && !line.includes('повторень')) {
       // Зберігаємо попередню вправу
       if (currentExercise && currentExercise.sets.length > 0) {
         exercises.push({
@@ -141,21 +137,20 @@ function parseHistoryExercises(text: string): CompletedExercise[] {
         sets: [],
       };
     } else if (currentExercise) {
-      // Перевіряємо чи це підхід
-      // Формати: "Підхід 1: 100 кг × 12 повторень" або "Підхід 1: 12 повторень" (без ваги)
-      const setWithWeightMatch = line.match(
-        /Підхід\s+(\d+):\s*(?:(\d+(?:[.,]\d+)?)\s*кг\s*[×x]\s*)?(\d+)\s*повторень/i
+      // Перевіряємо чи це підхід (новий формат без "Підхід 1:")
+      // Формати: "100 кг × 12 повторень" або "12 повторень" (без ваги)
+      const setMatch = line.match(
+        /(?:(\d+(?:[.,]\d+)?)\s*кг\s*[×x]\s*)?(\d+)\s*повторень/i
       );
       
-      if (setWithWeightMatch) {
-        const setNumber = parseInt(setWithWeightMatch[1]);
-        const weight = setWithWeightMatch[2] 
-          ? parseFloat(setWithWeightMatch[2].replace(',', '.')) 
+      if (setMatch) {
+        const weight = setMatch[1] 
+          ? parseFloat(setMatch[1].replace(',', '.')) 
           : 0;
-        const reps = parseInt(setWithWeightMatch[3]);
+        const reps = parseInt(setMatch[2]);
         
         currentExercise.sets.push({
-          setNumber,
+          setNumber: currentExercise.sets.length + 1,
           weight,
           reps,
         });
@@ -185,11 +180,11 @@ export function formatHistoryWorkout(workout: ParsedHistoryWorkout): string {
   workout.exercises.forEach((exercise, idx) => {
     result += `${idx + 1}. ${exercise.name}\n`;
     exercise.sets.forEach(set => {
-      result += `   Підхід ${set.setNumber}: `;
       if (set.weight > 0) {
-        result += `${set.weight} кг × `;
+        result += `   ${set.weight} кг × ${set.reps} повторень\n`;
+      } else {
+        result += `   ${set.reps} повторень\n`;
       }
-      result += `${set.reps} повторень\n`;
     });
     result += '\n';
   });
@@ -201,32 +196,52 @@ export function formatHistoryWorkout(workout: ParsedHistoryWorkout): string {
  * Генерує приклад тексту для імпорту
  */
 export function getImportExample(): string {
-  return `Дата: 15.10.2024
-День 1
+  return `Тиждень: 14.10.2024 - 20.10.2024
 
+День 1
 1. Присідання зі штангою
-Підхід 1: 100 кг × 12 повторень
-Підхід 2: 100 кг × 10 повторень
-Підхід 3: 100 кг × 8 повторень
+100 кг × 12 повторень
+100 кг × 10 повторень
+100 кг × 8 повторень
 
 2. Жим ногами
-Підхід 1: 150 кг × 15 повторень
-Підхід 2: 150 кг × 12 повторень
-Підхід 3: 150 кг × 10 повторень
+150 кг × 15 повторень
+150 кг × 12 повторень
+150 кг × 10 повторень
+
+День 2
+1. Жим штанги лежачи
+80 кг × 12 повторень
+80 кг × 10 повторень
+80 кг × 8 повторень
+
+2. Розведення гантелей
+16 кг × 15 повторень
+16 кг × 12 повторень
+16 кг × 10 повторень
+
+День 3
+1. Віджимання від підлоги
+20 повторень
+18 повторень
+15 повторень
+
+2. Підтягування
+10 повторень
+8 повторень
+6 повторень
 
 ---
 
-Дата: 17.10.2024
-День 2
+Тиждень: 21.10.2024 - 27.10.2024
 
-1. Жим штанги лежачи
-Підхід 1: 80 кг × 12 повторень
-Підхід 2: 80 кг × 10 повторень
-Підхід 3: 80 кг × 8 повторень
+День 1
+1. Присідання зі штангою
+102.5 кг × 12 повторень
+102.5 кг × 10 повторень
+102.5 кг × 8 повторень
 
-2. Розведення гантелей
-Підхід 1: 16 кг × 15 повторень
-Підхід 2: 16 кг × 12 повторень
-Підхід 3: 16 кг × 10 повторень`;
+2. Жим ногами
+155 кг × 15 повторень
+155 кг × 12 повторень`;
 }
-

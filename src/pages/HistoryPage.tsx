@@ -55,6 +55,61 @@ export function HistoryPage() {
     )
   ).sort();
 
+  // Group workouts by week
+  const getWeeklyWorkouts = () => {
+    const weeks: Array<{
+      startDate: Date;
+      endDate: Date;
+      workouts: WorkoutHistory[];
+      totalExercises: number;
+      avgWeight: number;
+    }> = [];
+
+    // Group by week (Monday to Sunday)
+    const groupedByWeek = new Map<string, WorkoutHistory[]>();
+    
+    history.forEach(workout => {
+      const date = new Date(workout.date);
+      const monday = new Date(date);
+      monday.setDate(date.getDate() - date.getDay() + 1); // Get Monday of the week
+      const weekKey = monday.toISOString().split('T')[0];
+      
+      if (!groupedByWeek.has(weekKey)) {
+        groupedByWeek.set(weekKey, []);
+      }
+      groupedByWeek.get(weekKey)!.push(workout);
+    });
+
+    // Convert to week objects
+    groupedByWeek.forEach((workouts, weekKey) => {
+      const monday = new Date(weekKey);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      
+      const totalExercises = workouts.reduce((sum, w) => sum + w.exercises.length, 0);
+      
+      // Calculate average weight
+      const allWeights = workouts.flatMap(w => 
+        w.exercises.flatMap(ex => 
+          ex.sets.map(s => s.weight).filter(w => w > 0)
+        )
+      );
+      const avgWeight = allWeights.length > 0 
+        ? allWeights.reduce((sum, w) => sum + w, 0) / allWeights.length 
+        : 0;
+
+      weeks.push({
+        startDate: monday,
+        endDate: sunday,
+        workouts: workouts.sort((a, b) => a.dayNumber - b.dayNumber),
+        totalExercises,
+        avgWeight,
+      });
+    });
+
+    return weeks.sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
+  };
+
   // Prepare chart data for selected exercise
   const getChartData = (exerciseName: string) => {
     const data: { date: string; maxWeight: number; avgWeight: number }[] = [];
@@ -178,27 +233,58 @@ export function HistoryPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Останні тренування</CardTitle>
+                <CardTitle>Тренування по тижнях</CardTitle>
+                <CardDescription>
+                  Всі тренування згруповані по тижнях
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {history.slice(0, 10).map(workout => (
-                    <div key={workout.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
+                <div className="space-y-6">
+                  {getWeeklyWorkouts().map((week, weekIdx) => (
+                    <div key={weekIdx} className="border rounded-lg p-4 bg-muted/30">
+                      <div className="flex items-center justify-between mb-4">
                         <div>
-                          <h3 className="font-bold">День {workout.dayNumber}</h3>
+                          <h3 className="font-bold text-lg">
+                            Тиждень {week.startDate.toLocaleDateString('uk-UA')} - {week.endDate.toLocaleDateString('uk-UA')}
+                          </h3>
                           <p className="text-sm text-muted-foreground">
-                            {formatShortDate(workout.date)}
+                            {week.workouts.length} тренувань
                           </p>
                         </div>
+                        <div className="text-right text-sm text-muted-foreground">
+                          <p>Всього вправ: {week.totalExercises}</p>
+                          <p>Середня вага: {week.avgWeight.toFixed(1)} кг</p>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        {workout.exercises.map((ex, idx) => (
-                          <div key={idx} className="text-sm">
-                            <p className="font-medium">{ex.name}</p>
-                            <p className="text-muted-foreground text-xs">
-                              {ex.sets.map(s => `${s.weight}кг × ${s.reps}`).join(', ')}
-                            </p>
+                      
+                      <div className="grid gap-3">
+                        {week.workouts.map(workout => (
+                          <div key={workout.id} className="bg-background rounded-md p-3 border">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold">День {workout.dayNumber}</h4>
+                              <span className="text-xs text-muted-foreground">
+                                {formatShortDate(workout.date)}
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              {workout.exercises.map((ex, idx) => (
+                                <div key={idx} className="text-sm">
+                                  <p className="font-medium text-sm">{ex.name}</p>
+                                  <div className="flex flex-col gap-1 mt-1">
+                                    {ex.sets.map((set, setIdx) => (
+                                      <div key={setIdx} className="text-xs text-muted-foreground">
+                                        {set.weight > 0 ? (
+                                          <span>{set.weight} кг × {set.reps} повторень</span>
+                                        ) : (
+                                          <span>{set.reps} повторень</span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         ))}
                       </div>
