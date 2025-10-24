@@ -33,7 +33,7 @@
   - Day number (День 1, 2, 3)
   - Exercise name
   - Sets (підходи)
-  - Reps (повторень)
+  - Reps ()
   - Special notes (Суперсет, Дропсет)
 - Store parsed plan in Firestore
 
@@ -98,8 +98,8 @@
 
 Create parser to handle formats like:
 
-- "3 підходи по 6-10 повторень" → {sets: 3, reps: "6-10"}
-- "Суперсет 2 підходи по 8-12 повторень" → {type: "superset", sets: 2, reps: "8-12"}
+- "3 підходи по 6-10 " → {sets: 3, reps: "6-10"}
+- "Суперсет 2 підходи по 8-12 " → {type: "superset", sets: 2, reps: "8-12"}
 - Extract exercise names like "Бруси", "Тяга однієї гантелі під нахилом"
 
 ### OpenAI Prompt Engineering

@@ -233,7 +233,7 @@ export function NewPlanPage() {
               <Textarea
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
-                placeholder="День 1&#10;&#10;1. Бруси&#10;За потреби беріть додаткову вагу 3 підходів по 5-8 повторень&#10;&#10;2. Тяга однієї гантелі під нахилом&#10;3 підходи по 6-10 повторень&#10;..."
+                placeholder="День 1&#10;&#10;1. Бруси&#10;За потреби беріть додаткову вагу 3 підходів по 5-8 &#10;&#10;2. Тяга однієї гантелі під нахилом&#10;3 підходи по 6-10 &#10;..."
                 className="min-h-[300px] font-mono text-sm"
               />
             </div>
@@ -276,7 +276,7 @@ export function NewPlanPage() {
                           <div className="flex-1">
                             <p className="font-medium">{ex.name}</p>
                             <p className="text-muted-foreground">
-                              {ex.sets} підходи × {ex.reps} повторень
+                              {ex.sets} підходи × {ex.reps}
                               {ex.type !== "normal" && ex.type && (
                                 <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
                                   {ex.type === "superset"

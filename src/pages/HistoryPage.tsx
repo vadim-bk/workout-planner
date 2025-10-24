@@ -1,14 +1,35 @@
-import { useEffect, useState } from 'react';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
-import { useAuth } from '@/contexts/AuthContext';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { WorkoutHistory } from '@/types';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Calendar, TrendingUp } from 'lucide-react';
-import { formatShortDate } from '@/lib/utils';
+import { useEffect, useState } from "react";
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { useAuth } from "@/contexts/AuthContext";
+import { Layout } from "@/components/layout/Layout";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { WorkoutHistory } from "@/types";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { Calendar, TrendingUp } from "lucide-react";
+import { formatShortDate } from "@/lib/utils";
 
 export function HistoryPage() {
   const { user } = useAuth();
@@ -24,15 +45,15 @@ export function HistoryPage() {
     if (!user) return;
 
     try {
-      const historyRef = collection(db, 'workout_history');
+      const historyRef = collection(db, "workout_history");
       const q = query(
         historyRef,
-        where('userId', '==', user.uid),
-        orderBy('date', 'desc')
+        where("userId", "==", user.uid),
+        orderBy("date", "desc")
       );
 
       const snapshot = await getDocs(q);
-      const workouts: WorkoutHistory[] = snapshot.docs.map(doc => ({
+      const workouts: WorkoutHistory[] = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         date: doc.data().date.toDate(),
@@ -40,7 +61,7 @@ export function HistoryPage() {
 
       setHistory(workouts);
     } catch (error) {
-      console.error('Error loading history:', error);
+      console.error("Error loading history:", error);
     } finally {
       setLoading(false);
     }
@@ -49,9 +70,7 @@ export function HistoryPage() {
   // Get unique exercise names
   const exerciseNames = Array.from(
     new Set(
-      history.flatMap(workout =>
-        workout.exercises.map(ex => ex.name)
-      )
+      history.flatMap((workout) => workout.exercises.map((ex) => ex.name))
     )
   ).sort();
 
@@ -61,19 +80,17 @@ export function HistoryPage() {
       startDate: Date;
       endDate: Date;
       workouts: WorkoutHistory[];
-      totalExercises: number;
-      avgWeight: number;
     }> = [];
 
     // Group by week (Monday to Sunday)
     const groupedByWeek = new Map<string, WorkoutHistory[]>();
-    
-    history.forEach(workout => {
+
+    history.forEach((workout) => {
       const date = new Date(workout.date);
       const monday = new Date(date);
       monday.setDate(date.getDate() - date.getDay() + 1); // Get Monday of the week
-      const weekKey = monday.toISOString().split('T')[0];
-      
+      const weekKey = monday.toISOString().split("T")[0];
+
       if (!groupedByWeek.has(weekKey)) {
         groupedByWeek.set(weekKey, []);
       }
@@ -85,25 +102,11 @@ export function HistoryPage() {
       const monday = new Date(weekKey);
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
-      
-      const totalExercises = workouts.reduce((sum, w) => sum + w.exercises.length, 0);
-      
-      // Calculate average weight
-      const allWeights = workouts.flatMap(w => 
-        w.exercises.flatMap(ex => 
-          ex.sets.map(s => s.weight).filter(w => w > 0)
-        )
-      );
-      const avgWeight = allWeights.length > 0 
-        ? allWeights.reduce((sum, w) => sum + w, 0) / allWeights.length 
-        : 0;
 
       weeks.push({
         startDate: monday,
         endDate: sunday,
         workouts: workouts.sort((a, b) => a.dayNumber - b.dayNumber),
-        totalExercises,
-        avgWeight,
       });
     });
 
@@ -117,14 +120,19 @@ export function HistoryPage() {
     history
       .slice()
       .reverse()
-      .forEach(workout => {
-        const exercise = workout.exercises.find(ex => ex.name === exerciseName);
+      .forEach((workout) => {
+        const exercise = workout.exercises.find(
+          (ex) => ex.name === exerciseName
+        );
         if (exercise) {
-          const weights = exercise.sets.map(s => s.weight).filter(w => w > 0);
+          const weights = exercise.sets
+            .map((s) => s.weight)
+            .filter((w) => w > 0);
           if (weights.length > 0) {
             const maxWeight = Math.max(...weights);
-            const avgWeight = weights.reduce((a, b) => a + b, 0) / weights.length;
-            
+            const avgWeight =
+              weights.reduce((a, b) => a + b, 0) / weights.length;
+
             data.push({
               date: formatShortDate(workout.date),
               maxWeight: Math.round(maxWeight * 10) / 10,
@@ -179,10 +187,12 @@ export function HistoryPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {exerciseNames.map(name => (
+                  {exerciseNames.map((name) => (
                     <Button
                       key={name}
-                      variant={selectedExercise === name ? 'default' : 'outline'}
+                      variant={
+                        selectedExercise === name ? "default" : "outline"
+                      }
                       size="sm"
                       onClick={() => setSelectedExercise(name)}
                       className="justify-start text-left h-auto py-2 px-3"
@@ -207,20 +217,26 @@ export function HistoryPage() {
                     <LineChart data={getChartData(selectedExercise)}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
-                      <YAxis label={{ value: 'Вага (кг)', angle: -90, position: 'insideLeft' }} />
+                      <YAxis
+                        label={{
+                          value: "Вага (кг)",
+                          angle: -90,
+                          position: "insideLeft",
+                        }}
+                      />
                       <Tooltip />
                       <Legend />
-                      <Line 
-                        type="monotone" 
-                        dataKey="maxWeight" 
-                        stroke="#3b82f6" 
+                      <Line
+                        type="monotone"
+                        dataKey="maxWeight"
+                        stroke="#3b82f6"
                         name="Макс. вага"
                         strokeWidth={2}
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="avgWeight" 
-                        stroke="#10b981" 
+                      <Line
+                        type="monotone"
+                        dataKey="avgWeight"
+                        stroke="#10b981"
                         name="Сер. вага"
                         strokeWidth={2}
                         strokeDasharray="5 5"
@@ -235,62 +251,71 @@ export function HistoryPage() {
               <CardHeader>
                 <CardTitle>Тренування по тижнях</CardTitle>
                 <CardDescription>
-                  Всі тренування згруповані по тижнях
+                  Всі тренування згруповані по тижнях. Натисніть на тиждень щоб розгорнути.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
+                <Accordion type="multiple" className="w-full">
                   {getWeeklyWorkouts().map((week, weekIdx) => (
-                    <div key={weekIdx} className="border rounded-lg p-4 bg-muted/30">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="font-bold text-lg">
-                            Тиждень {week.startDate.toLocaleDateString('uk-UA')} - {week.endDate.toLocaleDateString('uk-UA')}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {week.workouts.length} тренувань
-                          </p>
-                        </div>
-                        <div className="text-right text-sm text-muted-foreground">
-                          <p>Всього вправ: {week.totalExercises}</p>
-                          <p>Середня вага: {week.avgWeight.toFixed(1)} кг</p>
-                        </div>
-                      </div>
-                      
-                      <div className="grid gap-3">
-                        {week.workouts.map(workout => (
-                          <div key={workout.id} className="bg-background rounded-md p-3 border">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-semibold">День {workout.dayNumber}</h4>
-                              <span className="text-xs text-muted-foreground">
-                                {formatShortDate(workout.date)}
-                              </span>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              {workout.exercises.map((ex, idx) => (
-                                <div key={idx} className="text-sm">
-                                  <p className="font-medium text-sm">{ex.name}</p>
-                                  <div className="flex flex-col gap-1 mt-1">
-                                    {ex.sets.map((set, setIdx) => (
-                                      <div key={setIdx} className="text-xs text-muted-foreground">
-                                        {set.weight > 0 ? (
-                                          <span>{set.weight} кг × {set.reps} повторень</span>
-                                        ) : (
-                                          <span>{set.reps} повторень</span>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                    <AccordionItem key={weekIdx} value={`week-${weekIdx}`}>
+                      <AccordionTrigger className="hover:no-underline">
+                        <div className="flex items-center justify-between w-full pr-4">
+                          <div className="text-left">
+                            <h3 className="font-bold text-lg">
+                              Тиждень {week.startDate.toLocaleDateString("uk-UA")}{" "}
+                              - {week.endDate.toLocaleDateString("uk-UA")}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {week.workouts.length} тренувань
+                            </p>
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="grid gap-3 pt-2">
+                          {week.workouts.map((workout) => (
+                            <div
+                              key={workout.id}
+                              className="bg-muted/50 rounded-md p-3 border"
+                            >
+                              <div className="mb-2">
+                                <h4 className="font-semibold">
+                                  День {workout.dayNumber}
+                                </h4>
+                              </div>
+
+                              <div className="space-y-2">
+                                {workout.exercises.map((ex, idx) => (
+                                  <div key={idx} className="text-sm">
+                                    <p className="font-medium text-sm">
+                                      {idx + 1}. {ex.name}
+                                    </p>
+                                    <div className="flex flex-col gap-1 mt-1">
+                                      {ex.sets.map((set, setIdx) => (
+                                        <div
+                                          key={setIdx}
+                                          className="text-xs text-muted-foreground list-disc list-inside ml-4"
+                                        >
+                                          {set.weight > 0 ? (
+                                            <span>
+                                              {set.weight} кг × {set.reps}{" "}
+                                            </span>
+                                          ) : (
+                                            <span>{set.reps} </span>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
                   ))}
-                </div>
+                </Accordion>
               </CardContent>
             </Card>
           </>
@@ -299,4 +324,3 @@ export function HistoryPage() {
     </Layout>
   );
 }
-

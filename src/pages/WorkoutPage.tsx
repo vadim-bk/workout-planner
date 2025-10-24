@@ -321,7 +321,7 @@ export function WorkoutPage() {
                       </CardTitle>
                       <CardDescription className="mt-1">
                         {originalExercise?.sets} підходи ×{" "}
-                        {originalExercise?.reps} повторень
+                        {originalExercise?.reps}
                       </CardDescription>
                     </div>
                     {suggestion && (
@@ -410,9 +410,7 @@ export function WorkoutPage() {
                               </span>
                             )}
                             {set.reps > 0 && (
-                              <span className="font-medium">
-                                {set.reps} повторень
-                              </span>
+                              <span className="font-medium">{set.reps}</span>
                             )}
                             {set.weight === 0 && set.reps === 0 && (
                               <span className="text-muted-foreground italic">
