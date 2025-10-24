@@ -251,7 +251,8 @@ export function HistoryPage() {
               <CardHeader>
                 <CardTitle>Тренування по тижнях</CardTitle>
                 <CardDescription>
-                  Всі тренування згруповані по тижнях. Натисніть на тиждень щоб розгорнути.
+                  Всі тренування згруповані по тижнях. Натисніть на тиждень щоб
+                  розгорнути.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -262,8 +263,9 @@ export function HistoryPage() {
                         <div className="flex items-center justify-between w-full pr-4">
                           <div className="text-left">
                             <h3 className="font-bold text-lg">
-                              Тиждень {week.startDate.toLocaleDateString("uk-UA")}{" "}
-                              - {week.endDate.toLocaleDateString("uk-UA")}
+                              Тиждень{" "}
+                              {week.startDate.toLocaleDateString("uk-UA")} -{" "}
+                              {week.endDate.toLocaleDateString("uk-UA")}
                             </h3>
                             <p className="text-sm text-muted-foreground">
                               {week.workouts.length} тренувань
