@@ -147,7 +147,7 @@ function parseHistoryExercises(text: string): CompletedExercise[] {
         name: exerciseMatch[2].trim(),
         sets: [],
       };
-    } else if (currentExercise) {
+    } else if (currentExercise && line.trim() !== "") {
       // Перевіряємо чи це підхід (новий формат без "Підхід 1:")
       // Формати: "100 кг × 12" або "12" (без ваги)
       const setMatch = line.match(
