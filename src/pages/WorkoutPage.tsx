@@ -31,7 +31,15 @@ import {
   AISuggestion,
   WorkoutHistory,
 } from "@/types";
-import { Save, ChevronLeft, Sparkles, Edit, X } from "lucide-react";
+import {
+  Save,
+  ChevronLeft,
+  Sparkles,
+  Edit,
+  X,
+  Plus,
+  Minus,
+} from "lucide-react";
 
 export function WorkoutPage() {
   const { planId, day } = useParams<{ planId: string; day: string }>();
@@ -113,14 +121,14 @@ export function WorkoutPage() {
         initialExercises = existingData.exercises;
       } else {
         // Initialize with empty sets if no existing workout
-        setIsEditing(true); // Start in edit mode if no data
+        setIsEditing(false); // Always start in view mode
         initialExercises = currentDay.exercises.map((ex) => ({
           exerciseId: ex.id,
           name: ex.name,
           sets: Array.from({ length: ex.sets }, (_, i) => ({
             setNumber: i + 1,
             weight: 0,
-            reps: 0,
+            reps: parseInt(ex.reps.split("-")[0]) || 0, // Convert "6-10" to 6
           })),
         }));
       }
@@ -147,20 +155,37 @@ export function WorkoutPage() {
         } as AISuggestion);
       });
 
+      // Store AI suggestions for later use when editing
       setSuggestions(suggestionsMap);
 
-      // Auto-fill weights from AI suggestions ONLY if no existing workout
+      // Apply AI suggestions immediately for new workouts to show actual values
       if (historySnapshot.empty) {
         const exercisesWithSuggestions = initialExercises.map((ex) => {
           const suggestion = suggestionsMap.get(ex.name);
-          if (suggestion && suggestion.suggestedWeights.length > 0) {
+          if (
+            suggestion &&
+            suggestion.suggestedWeights &&
+            suggestion.suggestedWeights.length > 0
+          ) {
             return {
               ...ex,
               sets: ex.sets.map((set, idx) => ({
                 ...set,
                 weight:
                   suggestion.suggestedWeights[idx] ||
-                  suggestion.suggestedWeights[0] ||
+                  (suggestion.suggestedWeights.length > 0
+                    ? suggestion.suggestedWeights[
+                        suggestion.suggestedWeights.length - 1
+                      ]
+                    : 0) ||
+                  0,
+                reps:
+                  suggestion.suggestedReps[idx] ||
+                  (suggestion.suggestedReps.length > 0
+                    ? suggestion.suggestedReps[
+                        suggestion.suggestedReps.length - 1
+                      ]
+                    : 0) ||
                   0,
               })),
             };
@@ -186,6 +211,41 @@ export function WorkoutPage() {
     const updated = [...completedExercises];
     updated[exerciseIdx].sets[setIdx][field] = value;
     setCompletedExercises(updated);
+  };
+
+  const addSet = (exerciseIdx: number) => {
+    const updated = [...completedExercises];
+    const exercise = updated[exerciseIdx];
+    const newSetNumber = exercise.sets.length + 1;
+
+    // Отримуємо останні значення для нового підходу
+    const lastSet = exercise.sets[exercise.sets.length - 1];
+    const newSet = {
+      setNumber: newSetNumber,
+      weight: lastSet?.weight || 0,
+      reps: lastSet?.reps || 0,
+    };
+
+    exercise.sets.push(newSet);
+    setCompletedExercises(updated);
+  };
+
+  const removeSet = (exerciseIdx: number) => {
+    const updated = [...completedExercises];
+    const exercise = updated[exerciseIdx];
+
+    if (exercise.sets.length > 1) {
+      exercise.sets.pop();
+      // Перенумеруємо підходи
+      exercise.sets.forEach((set, index) => {
+        set.setNumber = index + 1;
+      });
+      setCompletedExercises(updated);
+    }
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
   };
 
   const handleSave = async () => {
@@ -291,7 +351,7 @@ export function WorkoutPage() {
               </Button>
             </div>
           ) : (
-            <Button onClick={() => setIsEditing(true)} size="lg">
+            <Button onClick={handleEditClick} size="lg">
               <Edit className="mr-2 h-5 w-5" />
               Редагувати
             </Button>
@@ -344,7 +404,7 @@ export function WorkoutPage() {
                       {exercise.sets.map((set, setIdx) => (
                         <div
                           key={setIdx}
-                          className="grid grid-cols-[auto_1fr_1fr] gap-3 items-center"
+                          className="grid grid-cols-[auto_1fr_1fr_auto] gap-3 items-center"
                         >
                           <span className="text-sm font-medium text-muted-foreground min-w-[80px]">
                             Підхід {set.setNumber}:
@@ -384,6 +444,26 @@ export function WorkoutPage() {
                               className="text-center"
                             />
                           </div>
+                          <div className="flex gap-1">
+                            {exercise.sets.length > 1 && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeSet(exerciseIdx)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Minus className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => addSet(exerciseIdx)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -399,22 +479,19 @@ export function WorkoutPage() {
                             Підхід {set.setNumber}:
                           </span>
                           <span className="flex-1">
-                            {set.weight > 0 && (
-                              <span className="font-bold text-lg">
-                                {set.weight} кг
-                              </span>
-                            )}
-                            {set.weight > 0 && set.reps > 0 && (
-                              <span className="mx-2 text-muted-foreground">
-                                ×
-                              </span>
-                            )}
-                            {set.reps > 0 && (
-                              <span className="font-medium">{set.reps}</span>
-                            )}
-                            {set.weight === 0 && set.reps === 0 && (
+                            {set.weight > 0 && set.reps > 0 ? (
+                              <>
+                                <span className="font-bold text-lg">
+                                  {set.weight} кг
+                                </span>
+                                <span className="mx-2 text-muted-foreground">
+                                  ×
+                                </span>
+                                <span className="font-medium">{set.reps}</span>
+                              </>
+                            ) : (
                               <span className="text-muted-foreground italic">
-                                Не виконано
+                                План: {originalExercise?.reps} повторень
                               </span>
                             )}
                           </span>

@@ -3,7 +3,7 @@ export interface Exercise {
   name: string;
   sets: number;
   reps: string; // "6-10" or "8-12"
-  type?: 'superset' | 'dropset' | 'normal';
+  type?: "superset" | "dropset" | "normal";
   notes?: string;
 }
 
@@ -50,6 +50,7 @@ export interface AISuggestion {
   weekPlanId: string;
   exerciseName: string;
   suggestedWeights: number[];
+  suggestedReps: number[];
   reasoning?: string;
   createdAt: Date;
 }
@@ -60,4 +61,3 @@ export interface User {
   displayName: string | null;
   photoURL: string | null;
 }
-

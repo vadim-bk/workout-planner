@@ -141,6 +141,7 @@ export function NewPlanPage() {
           weekPlanId: suggestion.weekPlanId,
           exerciseName: suggestion.exerciseName,
           suggestedWeights: suggestion.suggestedWeights,
+          suggestedReps: suggestion.suggestedReps,
           reasoning: suggestion.reasoning,
           createdAt: Timestamp.fromDate(suggestion.createdAt),
         })
