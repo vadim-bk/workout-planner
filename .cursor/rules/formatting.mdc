@@ -1,0 +1,49 @@
+# Cursor Rules for Gym Workout Planner
+
+## Code Style and Formatting
+
+### React/TypeScript Structure
+- Use arrow functional components with TypeScript interfaces
+- Place imports at the top, grouped by type (React, third-party, local)
+- Use destructuring for props and hooks
+
+### JSX Formatting and Layout
+- Use logical grouping with empty lines to separate different sections:
+  - Separate navigation items with empty lines
+  - Group related elements together (e.g., user profile section)
+  - Add empty lines before major JSX blocks (nav, main, etc.)
+- Use consistent indentation (2 spaces)
+- Place closing tags on new lines for better readability
+- Use meaningful className combinations for styling
+
+### Component Organization
+- Group related functionality together:
+  - Navigation links in one section
+  - User profile/authentication in separate section
+  - Use visual separators (borders, margins) to distinguish sections
+- Use semantic HTML structure (nav, main, etc.)
+- Keep component logic concise and focused
+
+### Styling Guidelines
+- Use Tailwind CSS classes consistently
+- Group related classes logically (layout, spacing, colors, etc.)
+- Use responsive design patterns (hidden md:inline, etc.)
+- Maintain consistent spacing and sizing patterns
+
+### Code Comments and Documentation
+- Use Ukrainian language for user-facing text
+- Keep code comments minimal but meaningful
+- Use descriptive variable and function names
+
+### File Structure
+- Place components in appropriate directories (components/, pages/, contexts/)
+- Use barrel exports when appropriate
+- Maintain consistent file naming conventions
+
+## Best Practices
+- Always handle async operations properly
+- Use proper TypeScript typing
+- Implement proper error handling
+- Follow React best practices for state management
+- Use semantic HTML elements
+- Ensure accessibility compliance

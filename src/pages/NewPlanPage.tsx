@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import {
   collection,
   addDoc,
@@ -11,18 +11,18 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
-import { Layout } from "@/components/layout/Layout";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+  Button,
+  Textarea,
+  Input,
+  Alert,
+  AlertDescription,
+} from "@/shared/ui";
 import { parseWorkoutPlan } from "@/lib/parsers/workoutParser";
 import { generateWeightSuggestions } from "@/lib/openai/suggestions";
 import { WeeklyPlan, WorkoutHistory } from "@/types";
@@ -181,159 +181,168 @@ export function NewPlanPage() {
   };
 
   return (
-    <Layout>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Новий план тренувань</h1>
-          <p className="text-muted-foreground mt-1">
-            Вставте текст плану від вашого тренера
-          </p>
-        </div>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Новий план тренувань</h1>
+        <p className="text-muted-foreground mt-1">
+          Вставте текст плану від вашого тренера
+        </p>
+      </div>
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Введіть план тренувань</CardTitle>
-            <CardDescription>
-              Скопіюйте текст з сайту тренера та вставте нижче
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Початок тижня
-                </label>
-                <Input
-                  type="date"
-                  value={weekStart}
-                  onChange={(e) => setWeekStart(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Кінець тижня
-                </label>
-                <Input
-                  type="date"
-                  value={weekEnd}
-                  onChange={(e) => setWeekEnd(e.target.value)}
-                />
-              </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Введіть план тренувань</CardTitle>
+
+          <CardDescription>
+            Скопіюйте текст з сайту тренера та вставте нижче
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Початок тижня
+              </label>
+
+              <Input
+                type="date"
+                value={weekStart}
+                onChange={(e) => setWeekStart(e.target.value)}
+              />
             </div>
 
             <div>
               <label className="text-sm font-medium mb-2 block">
-                Текст плану
+                Кінець тижня
               </label>
-              <Textarea
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                placeholder="День 1&#10;&#10;1. Бруси&#10;За потреби беріть додаткову вагу 3 підходів по 5-8 &#10;&#10;2. Тяга однієї гантелі під нахилом&#10;3 підходи по 6-10 &#10;..."
-                className="min-h-[300px] font-mono text-sm"
+
+              <Input
+                type="date"
+                value={weekEnd}
+                onChange={(e) => setWeekEnd(e.target.value)}
               />
             </div>
+          </div>
 
-            <div className="flex gap-2">
+          <div>
+            <label className="text-sm font-medium mb-2 block">
+              Текст плану
+            </label>
+
+            <Textarea
+              value={rawText}
+              onChange={(e) => setRawText(e.target.value)}
+              placeholder="День 1&#10;&#10;1. Бруси&#10;За потреби беріть додаткову вагу 3 підходів по 5-8 &#10;&#10;2. Тяга однієї гантелі під нахилом&#10;3 підходи по 6-10 &#10;..."
+              className="min-h-[300px] font-mono text-sm"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              onClick={handleParse}
+              disabled={!rawText || !weekStart || !weekEnd}
+              variant="outline"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              Переглянути план
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {parsedPlan && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Розпізнаний план</CardTitle>
+
+            <CardDescription>
+              Перевірте правильність розпізнавання
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <div className="space-y-6">
+              {parsedPlan.days.map((day) => (
+                <div key={day.day} className="border rounded-lg p-4">
+                  <h3 className="font-bold text-lg mb-3">День {day.day}</h3>
+
+                  <div className="space-y-2">
+                    {day.exercises.map((ex, idx) => (
+                      <div
+                        key={ex.id}
+                        className="flex items-start gap-2 text-sm"
+                      >
+                        <span className="font-medium text-muted-foreground min-w-6">
+                          {idx + 1}.
+                        </span>
+
+                        <div className="flex-1">
+                          <p className="font-medium">{ex.name}</p>
+
+                          <p className="text-muted-foreground">
+                            {ex.sets} підходи × {ex.reps}
+                            {ex.type !== "normal" && ex.type && (
+                              <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                {ex.type === "superset"
+                                  ? "Суперсет"
+                                  : "Дропсет"}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3">
               <Button
-                onClick={handleParse}
-                disabled={!rawText || !weekStart || !weekEnd}
-                variant="outline"
+                onClick={handleSaveAndGenerateAI}
+                disabled={isGeneratingAI || isSaving}
+                size="lg"
+                className="w-full"
               >
-                <Eye className="mr-2 h-4 w-4" />
-                Переглянути план
+                {isGeneratingAI ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                    Генерація AI підказок...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Зберегти та отримати AI підказки
+                  </>
+                )}
               </Button>
+
+              <Button
+                onClick={handleSaveWithoutAI}
+                disabled={isSaving}
+                size="lg"
+                variant="outline"
+                className="w-full"
+              >
+                <Save className="mr-2 h-4 w-4" />
+                Зберегти без AI підказок
+              </Button>
+
+              <p className="text-xs text-muted-foreground text-center">
+                💡 Підказка: AI підказки можна додати пізніше, або ввести вагу
+                вручну
+              </p>
             </div>
           </CardContent>
         </Card>
-
-        {parsedPlan && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Розпізнаний план</CardTitle>
-              <CardDescription>
-                Перевірте правильність розпізнавання
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {parsedPlan.days.map((day) => (
-                  <div key={day.day} className="border rounded-lg p-4">
-                    <h3 className="font-bold text-lg mb-3">День {day.day}</h3>
-                    <div className="space-y-2">
-                      {day.exercises.map((ex, idx) => (
-                        <div
-                          key={ex.id}
-                          className="flex items-start gap-2 text-sm"
-                        >
-                          <span className="font-medium text-muted-foreground min-w-6">
-                            {idx + 1}.
-                          </span>
-                          <div className="flex-1">
-                            <p className="font-medium">{ex.name}</p>
-                            <p className="text-muted-foreground">
-                              {ex.sets} підходи × {ex.reps}
-                              {ex.type !== "normal" && ex.type && (
-                                <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                                  {ex.type === "superset"
-                                    ? "Суперсет"
-                                    : "Дропсет"}
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 flex flex-col gap-3">
-                <Button
-                  onClick={handleSaveAndGenerateAI}
-                  disabled={isGeneratingAI || isSaving}
-                  size="lg"
-                  className="w-full"
-                >
-                  {isGeneratingAI ? (
-                    <>
-                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                      Генерація AI підказок...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Зберегти та отримати AI підказки
-                    </>
-                  )}
-                </Button>
-
-                <Button
-                  onClick={handleSaveWithoutAI}
-                  disabled={isSaving}
-                  size="lg"
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  Зберегти без AI підказок
-                </Button>
-
-                <p className="text-xs text-muted-foreground text-center">
-                  💡 Підказка: AI підказки можна додати пізніше, або ввести вагу
-                  вручну
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </Layout>
+      )}
+    </div>
   );
 }
