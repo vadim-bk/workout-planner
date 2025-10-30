@@ -1,6 +1,6 @@
-import { Button, Card, CardContent } from "@/shared/ui";
-import { Dumbbell, Plus } from "lucide-react";
-import { Link } from "react-router";
+import { Dumbbell, Plus } from 'lucide-react';
+import { Link } from 'react-router';
+import { Button, Card, CardContent } from '@/shared/ui';
 
 export const EmptyPlan = () => {
   return (
@@ -10,9 +10,7 @@ export const EmptyPlan = () => {
 
         <h2 className="text-2xl font-bold mb-2">Немає активних планів</h2>
 
-        <p className="text-muted-foreground mb-6">
-          Почніть додаванням вашого першого плану тренувань
-        </p>
+        <p className="text-muted-foreground mb-6">Почніть додаванням вашого першого плану тренувань</p>
 
         <Link to="/new-plan">
           <Button size="lg">

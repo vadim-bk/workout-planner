@@ -1,10 +1,10 @@
-import { Loader } from "@/shared/ui";
-import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, Outlet } from "react-router";
+import { Navigate, Outlet } from 'react-router';
+import { useAuth } from '@/contexts/AuthContext';
+import { Loader } from '@/shared/ui';
 
 export enum AuthPermission {
-  AUTH = "auth",
-  NO_AUTH = "no_auth",
+  AUTH = 'auth',
+  NO_AUTH = 'no_auth',
 }
 
 type Props = {

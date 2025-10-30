@@ -1,13 +1,6 @@
-import { useAuth } from "@/contexts/AuthContext";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui";
-import { Chrome } from "lucide-react";
+import { Chrome } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui';
 
 export const LogIn = () => {
   const { signInWithGoogle } = useAuth();
@@ -16,9 +9,7 @@ export const LogIn = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">
-            💪 Workout Planner
-          </CardTitle>
+          <CardTitle className="text-3xl font-bold">💪 Workout Planner</CardTitle>
 
           <CardDescription className="text-base mt-2">
             Керуйте своїми тренуваннями та відстежуйте прогрес

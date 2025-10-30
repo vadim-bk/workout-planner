@@ -1,10 +1,15 @@
-import { AuthProvider } from "@/contexts/AuthContext";
-import { AppRouter } from "../AppRouter";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { AppRouter } from '../AppRouter';
+import { QueryClient } from '../QueryClient';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export const App = () => {
   return (
-    <AuthProvider>
-      <AppRouter />
-    </AuthProvider>
+    <QueryClient>
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClient>
   );
 };

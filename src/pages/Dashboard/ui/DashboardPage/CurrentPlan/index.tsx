@@ -1,17 +1,9 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Loader,
-  Button,
-} from "@/shared/ui";
-import { Link } from "react-router";
-import { Plus, Calendar, History as HistoryIcon } from "lucide-react";
-import { WeeklyPlan } from "@/types";
-import { formatShortDate } from "@/lib/utils";
-import { EmptyPlan } from "./EmptyPlan";
+import { Plus, Calendar, History as HistoryIcon } from 'lucide-react';
+import { Link } from 'react-router';
+import { EmptyPlan } from './EmptyPlan';
+import type { WeeklyPlan } from '@/types';
+import { formatShortDate } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Loader, Button } from '@/shared/ui';
 
 type Props = {
   isLoading: boolean;
@@ -34,14 +26,11 @@ export const CurrentPlan = ({ currentPlan, isLoading }: Props) => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl">
-                  Поточний план тренувань
-                </CardTitle>
+                <CardTitle className="text-2xl">Поточний план тренувань</CardTitle>
 
                 <CardDescription className="text-base mt-1">
                   <Calendar className="inline h-4 w-4 mr-1" />
-                  {formatShortDate(currentPlan.weekStartDate)} -{" "}
-                  {formatShortDate(currentPlan.weekEndDate)}
+                  {formatShortDate(currentPlan.weekStartDate)} - {formatShortDate(currentPlan.weekEndDate)}
                 </CardDescription>
               </div>
             </div>
@@ -50,16 +39,11 @@ export const CurrentPlan = ({ currentPlan, isLoading }: Props) => {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-3">
               {currentPlan.days.map((day) => (
-                <Link
-                  key={day.day}
-                  to={`/workout/${currentPlan.id}/${day.day}`}
-                >
+                <Link key={day.day} to={`/workout/${currentPlan.id}/${day.day}`}>
                   <Card className="hover:border-primary transition-colors cursor-pointer">
                     <CardHeader>
                       <CardTitle>День {day.day}</CardTitle>
-                      <CardDescription>
-                        {day.exercises.length} вправ
-                      </CardDescription>
+                      <CardDescription>{day.exercises.length} вправ</CardDescription>
                     </CardHeader>
 
                     <CardContent>
@@ -71,9 +55,7 @@ export const CurrentPlan = ({ currentPlan, isLoading }: Props) => {
                         ))}
 
                         {day.exercises.length > 3 && (
-                          <p className="text-xs text-muted-foreground">
-                            +{day.exercises.length - 3} ще...
-                          </p>
+                          <p className="text-xs text-muted-foreground">+{day.exercises.length - 3} ще...</p>
                         )}
                       </div>
                     </CardContent>

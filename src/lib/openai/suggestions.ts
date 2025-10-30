@@ -1,5 +1,5 @@
-import OpenAI from "openai";
-import { WeeklyPlan, WorkoutHistory, AISuggestion } from "@/types";
+import OpenAI from 'openai';
+import type { WeeklyPlan, WorkoutHistory, AISuggestion } from '@/types';
 
 const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -85,45 +85,40 @@ ${newPlanText}
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       messages: [
         {
-          role: "system",
-          content:
-            "Ти - професійний тренер з фітнесу. Відповідай завжди українською мовою та тільки в JSON форматі.",
+          role: 'system',
+          content: 'Ти - професійний тренер з фітнесу. Відповідай завжди українською мовою та тільки в JSON форматі.',
         },
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
       temperature: 0.7,
-      response_format: { type: "json_object" },
+      response_format: { type: 'json_object' },
     });
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error("No response from OpenAI");
+      throw new Error('No response from OpenAI');
     }
 
     let result;
     try {
       result = JSON.parse(content);
     } catch (parseError) {
-      console.error("Failed to parse OpenAI response:", parseError);
-      console.error("Raw response:", content);
-      throw new Error("Invalid JSON response from OpenAI");
+      console.error('Failed to parse OpenAI response:', parseError);
+      console.error('Raw response:', content);
+      throw new Error('Invalid JSON response from OpenAI');
     }
 
     // Convert to Map of AISuggestions
     if (result.suggestions && Array.isArray(result.suggestions)) {
       result.suggestions.forEach((suggestion: any) => {
         // Validate suggestion data
-        if (
-          suggestion.exerciseName &&
-          suggestion.suggestedWeights &&
-          suggestion.suggestedReps
-        ) {
+        if (suggestion.exerciseName && suggestion.suggestedWeights && suggestion.suggestedReps) {
           const aiSuggestion: AISuggestion = {
             id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             userId: newPlan.userId,
@@ -131,9 +126,7 @@ ${newPlanText}
             exerciseName: suggestion.exerciseName,
             suggestedWeights: suggestion.suggestedWeights || [],
             suggestedReps: suggestion.suggestedReps || [],
-            reasoning:
-              suggestion.reasoning ||
-              "AI підказка на основі аналізу історії тренувань",
+            reasoning: suggestion.reasoning || 'AI підказка на основі аналізу історії тренувань',
             createdAt: new Date(),
           };
 
@@ -142,7 +135,7 @@ ${newPlanText}
       });
     }
   } catch (error) {
-    console.error("Error generating AI suggestions:", error);
+    console.error('Error generating AI suggestions:', error);
     throw error;
   }
 
@@ -151,33 +144,26 @@ ${newPlanText}
 
 function formatWorkoutHistory(history: WorkoutHistory[]): string {
   if (history.length === 0) {
-    return "Історія тренувань відсутня. Це перший план користувача.";
+    return 'Історія тренувань відсутня. Це перший план користувача.';
   }
 
   // Get workouts from last 2 months
   const twoMonthsAgo = new Date();
   twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
-  const recentHistory = history.filter(
-    (workout) => workout.date >= twoMonthsAgo
-  );
+  const recentHistory = history.filter((workout) => workout.date >= twoMonthsAgo);
 
   // Sort by date, most recent first
-  const sortedHistory = [...recentHistory].sort(
-    (a, b) => b.date.getTime() - a.date.getTime()
-  );
+  const sortedHistory = [...recentHistory].sort((a, b) => b.date.getTime() - a.date.getTime());
 
   if (sortedHistory.length === 0) {
-    return "Історія тренувань за останні 2 місяці відсутня. Це перший план користувача за цей період.";
+    return 'Історія тренувань за останні 2 місяці відсутня. Це перший план користувача за цей період.';
   }
 
   let formatted = `Всього тренувань за останні 2 місяці: ${sortedHistory.length}\n\n`;
 
   // Group exercises by name to show progression
-  const exerciseHistory: Map<
-    string,
-    Array<{ date: Date; sets: any[] }>
-  > = new Map();
+  const exerciseHistory: Map<string, Array<{ date: Date; sets: any[] }>> = new Map();
 
   sortedHistory.forEach((workout) => {
     workout.exercises.forEach((ex) => {
@@ -192,17 +178,15 @@ function formatWorkoutHistory(history: WorkoutHistory[]): string {
   });
 
   // Show detailed history per exercise
-  formatted += "📋 ІСТОРІЯ ПО ВПРАВАХ (останні 5 тренувань):\n\n";
+  formatted += '📋 ІСТОРІЯ ПО ВПРАВАХ (останні 5 тренувань):\n\n';
   exerciseHistory.forEach((records, exerciseName) => {
     formatted += `▸ ${exerciseName}:\n`;
     records.slice(0, 5).forEach((record, idx) => {
       // Last 5 occurrences
-      const isLatest = idx === 0 ? " (ОСТАННЄ)" : "";
-      formatted += `  ${record.date.toLocaleDateString("uk-UA")}${isLatest}: `;
-      const weights = record.sets
-        .map((s) => `${s.weight}кг×${s.reps}`)
-        .join(", ");
-      formatted += weights + "\n";
+      const isLatest = idx === 0 ? ' (ОСТАННЄ)' : '';
+      formatted += `  ${record.date.toLocaleDateString('uk-UA')}${isLatest}: `;
+      const weights = record.sets.map((s) => `${s.weight}кг×${s.reps}`).join(', ');
+      formatted += weights + '\n';
     });
 
     // Add progression analysis
@@ -213,30 +197,24 @@ function formatWorkoutHistory(history: WorkoutHistory[]): string {
       const previousMaxWeight = Math.max(...previous.sets.map((s) => s.weight));
 
       if (latestMaxWeight > previousMaxWeight) {
-        formatted += `  📈 ПРОГРЕСІЯ: +${(
-          latestMaxWeight - previousMaxWeight
-        ).toFixed(1)}кг за останнім тренуванням\n`;
+        formatted += `  📈 ПРОГРЕСІЯ: +${(latestMaxWeight - previousMaxWeight).toFixed(1)}кг за останнім тренуванням\n`;
       } else if (latestMaxWeight === previousMaxWeight) {
         formatted += `  📊 СТАБІЛЬНО: та сама максимальна вага\n`;
       } else {
-        formatted += `  📉 ЗМЕНШЕННЯ: -${(
-          previousMaxWeight - latestMaxWeight
-        ).toFixed(1)}кг за останнім тренуванням\n`;
+        formatted += `  📉 ЗМЕНШЕННЯ: -${(previousMaxWeight - latestMaxWeight).toFixed(1)}кг за останнім тренуванням\n`;
       }
     }
-    formatted += "\n";
+    formatted += '\n';
   });
 
   // Show recent workouts chronologically
-  formatted += "\n📅 ОСТАННІ ТРЕНУВАННЯ:\n";
+  formatted += '\n📅 ОСТАННІ ТРЕНУВАННЯ:\n';
   sortedHistory.slice(0, 10).forEach((workout) => {
-    formatted += `\nДата: ${workout.date.toLocaleDateString("uk-UA")} (День ${
-      workout.dayNumber
-    }):\n`;
+    formatted += `\nДата: ${workout.date.toLocaleDateString('uk-UA')} (День ${workout.dayNumber}):\n`;
     workout.exercises.forEach((ex) => {
       formatted += `  - ${ex.name}: `;
-      const sets = ex.sets.map((s) => `${s.weight}кг×${s.reps}`).join(", ");
-      formatted += sets + "\n";
+      const sets = ex.sets.map((s) => `${s.weight}кг×${s.reps}`).join(', ');
+      formatted += sets + '\n';
     });
   });
 
@@ -245,22 +223,20 @@ function formatWorkoutHistory(history: WorkoutHistory[]): string {
 
 function formatNewPlan(plan: WeeklyPlan): string {
   let formatted = `Тиждень: ${plan.weekStartDate.toLocaleDateString(
-    "uk-UA"
-  )} - ${plan.weekEndDate.toLocaleDateString("uk-UA")}\n\n`;
+    'uk-UA'
+  )} - ${plan.weekEndDate.toLocaleDateString('uk-UA')}\n\n`;
 
   plan.days.forEach((day) => {
     formatted += `ДЕНЬ ${day.day}:\n`;
     day.exercises.forEach((ex, idx) => {
       formatted += `${idx + 1}. ${ex.name}\n`;
       formatted += `   ${ex.sets} підходи по ${ex.reps} повторень\n`;
-      if (ex.type && ex.type !== "normal") {
-        formatted += `   Тип: ${
-          ex.type === "superset" ? "Суперсет" : "Дропсет"
-        }\n`;
+      if (ex.type && ex.type !== 'normal') {
+        formatted += `   Тип: ${ex.type === 'superset' ? 'Суперсет' : 'Дропсет'}\n`;
       }
       formatted += `   Потрібно запропонувати ${ex.sets} різних ваг та повторень для кожного підходу\n`;
     });
-    formatted += "\n";
+    formatted += '\n';
   });
 
   return formatted;

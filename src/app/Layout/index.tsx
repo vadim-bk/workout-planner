@@ -1,7 +1,7 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/shared/ui";
-import { Home, Plus, History, LogOut, Upload } from "lucide-react";
-import { Outlet, useNavigate, Link } from "react-router";
+import { Home, Plus, History, LogOut, Upload } from 'lucide-react';
+import { Outlet, useNavigate, Link } from 'react-router';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/shared/ui';
 
 type NavigationItem = {
   label: string;
@@ -11,25 +11,25 @@ type NavigationItem = {
 
 const navigationItems: NavigationItem[] = [
   {
-    label: "Головна",
+    label: 'Головна',
     IconComponent: Home,
-    to: "/",
+    to: '/',
   },
 
   {
-    label: "Новий план",
+    label: 'Новий план',
     IconComponent: Plus,
-    to: "/new-plan",
+    to: '/new-plan',
   },
   {
-    label: "Імпорт історії",
+    label: 'Імпорт історії',
     IconComponent: Upload,
-    to: "/import-history",
+    to: '/import-history',
   },
   {
-    label: "Історія",
+    label: 'Історія',
     IconComponent: History,
-    to: "/history",
+    to: '/history',
   },
 ];
 
@@ -40,7 +40,7 @@ export const Layout = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/login");
+    navigate('/login');
   };
 
   return (
@@ -64,16 +64,10 @@ export const Layout = () => {
 
               <div className="flex items-center gap-2 ml-4 pl-4 border-l">
                 {user?.photoURL && (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName || "User"}
-                    className="h-8 w-8 rounded-full"
-                  />
+                  <img src={user.photoURL} alt={user.displayName || 'User'} className="h-8 w-8 rounded-full" />
                 )}
 
-                <span className="text-sm hidden md:inline">
-                  {user?.displayName || user?.email}
-                </span>
+                <span className="text-sm hidden md:inline">{user?.displayName || user?.email}</span>
 
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4" />

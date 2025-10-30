@@ -1,4 +1,4 @@
-import { CompletedExercise } from "@/types";
+import type { CompletedExercise } from '@/types';
 
 interface ParsedHistoryWorkout {
   date: Date;
@@ -37,19 +37,16 @@ export function parseHistoryWorkouts(text: string): ParsedHistoryWorkout[] {
 
   // Очищаємо текст
   const cleanText = text
-    .replace(/\r\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 
   // Шукаємо тижні
-  const weekRegex =
-    /Тиждень:\s*(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})\s*-\s*(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/gi;
+  const weekRegex = /Тиждень:\s*(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})\s*-\s*(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})/gi;
   const weekMatches = [...cleanText.matchAll(weekRegex)];
 
   if (weekMatches.length === 0) {
-    throw new Error(
-      'Не знайдено тижнів у форматі "Тиждень: ДД.ММ.РРРР - ДД.ММ.РРРР"'
-    );
+    throw new Error('Не знайдено тижнів у форматі "Тиждень: ДД.ММ.РРРР - ДД.ММ.РРРР"');
   }
 
   weekMatches.forEach((match, weekIndex) => {
@@ -64,10 +61,7 @@ export function parseHistoryWorkouts(text: string): ParsedHistoryWorkout[] {
     const endDate = new Date(endYear, endMonth - 1, endDay);
 
     const startIndex = match.index!;
-    const endIndex =
-      weekIndex < weekMatches.length - 1
-        ? weekMatches[weekIndex + 1].index!
-        : cleanText.length;
+    const endIndex = weekIndex < weekMatches.length - 1 ? weekMatches[weekIndex + 1].index! : cleanText.length;
 
     const weekText = cleanText.substring(startIndex, endIndex);
     const weekWorkouts = parseWeekBlock(weekText, startDate, endDate);
@@ -78,11 +72,7 @@ export function parseHistoryWorkouts(text: string): ParsedHistoryWorkout[] {
   return workouts;
 }
 
-function parseWeekBlock(
-  text: string,
-  startDate: Date,
-  _endDate: Date
-): ParsedHistoryWorkout[] {
+function parseWeekBlock(text: string, startDate: Date, _endDate: Date): ParsedHistoryWorkout[] {
   const workouts: ParsedHistoryWorkout[] = [];
 
   // Розділяємо по днях
@@ -96,10 +86,7 @@ function parseWeekBlock(
   dayMatches.forEach((match, index) => {
     const dayNumber = parseInt(match[1]);
     const startIndex = match.index!;
-    const endIndex =
-      index < dayMatches.length - 1
-        ? dayMatches[index + 1].index!
-        : text.length;
+    const endIndex = index < dayMatches.length - 1 ? dayMatches[index + 1].index! : text.length;
 
     const dayText = text.substring(startIndex, endIndex);
     const exercises = parseHistoryExercises(dayText);
@@ -122,7 +109,7 @@ function parseWeekBlock(
 
 function parseHistoryExercises(text: string): CompletedExercise[] {
   const exercises: CompletedExercise[] = [];
-  const lines = text.split("\n");
+  const lines = text.split('\n');
 
   let currentExercise: {
     name: string;
@@ -139,18 +126,13 @@ function parseHistoryExercises(text: string): CompletedExercise[] {
     if (exerciseMatch) {
       // Перевіряємо чи це дійсно назва вправи, а не підхід
       const isExerciseName =
-        !line.includes("кг") &&
-        !line.includes(" × ") &&
-        !/^\d+$/.test(line) &&
-        !line.match(/^\d+\s*кг/);
+        !line.includes('кг') && !line.includes(' × ') && !/^\d+$/.test(line) && !line.match(/^\d+\s*кг/);
 
       if (isExerciseName) {
         // Зберігаємо попередню вправу
         if (currentExercise && currentExercise.sets.length > 0) {
           exercises.push({
-            exerciseId: `${Date.now()}-${Math.random()
-              .toString(36)
-              .substr(2, 9)}`,
+            exerciseId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             name: currentExercise.name,
             sets: currentExercise.sets,
           });
@@ -162,12 +144,10 @@ function parseHistoryExercises(text: string): CompletedExercise[] {
           sets: [],
         };
       }
-    } else if (currentExercise && line.trim() !== "") {
+    } else if (currentExercise && line.trim() !== '') {
       // Перевіряємо чи це підхід
       // Формати: "100 кг × 12" або "12" (без ваги) або "макс" для максимальних повторень
-      const setMatch = line.match(
-        /^(?:(\d+(?:[.,]\d+)?)\s*кг\s*[×x]\s*)?(\d+)(?:\s*$|$)/i
-      );
+      const setMatch = line.match(/^(?:(\d+(?:[.,]\d+)?)\s*кг\s*[×x]\s*)?(\d+)(?:\s*$|$)/i);
 
       // Додаткова перевірка: рядок повинен бути простим числом або містити кг та ×
       const isValidSet =
@@ -176,9 +156,7 @@ function parseHistoryExercises(text: string): CompletedExercise[] {
           line.match(/^\d+(?:[.,]\d+)?\s*кг\s*[×x]\s*\d+$/i)); // Вага та повторення
 
       if (isValidSet) {
-        const weight = setMatch[1]
-          ? parseFloat(setMatch[1].replace(",", "."))
-          : 0;
+        const weight = setMatch[1] ? parseFloat(setMatch[1].replace(',', '.')) : 0;
         const reps = parseInt(setMatch[2]);
 
         currentExercise.sets.push({
@@ -206,7 +184,7 @@ function parseHistoryExercises(text: string): CompletedExercise[] {
  * Форматує історичне тренування для відображення
  */
 export function formatHistoryWorkout(workout: ParsedHistoryWorkout): string {
-  let result = `Дата: ${workout.date.toLocaleDateString("uk-UA")}\n`;
+  let result = `Дата: ${workout.date.toLocaleDateString('uk-UA')}\n`;
   result += `День ${workout.dayNumber}\n\n`;
 
   workout.exercises.forEach((exercise, idx) => {
@@ -218,7 +196,7 @@ export function formatHistoryWorkout(workout: ParsedHistoryWorkout): string {
         result += `   ${set.reps} \n`;
       }
     });
-    result += "\n";
+    result += '\n';
   });
 
   return result;

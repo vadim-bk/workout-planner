@@ -1,14 +1,8 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui";
-import { CompletedExercise, DayWorkout, AISuggestion } from "@/types";
-import { Sparkles } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
-import { ExerciseSet } from "./ExerciseSet";
+import { Sparkles } from 'lucide-react';
+import { ExerciseSet } from './ExerciseSet';
+import type { CompletedExercise, DayWorkout, AISuggestion } from '@/types';
+import type { Dispatch, SetStateAction } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui';
 
 type Props = {
   dayWorkout: DayWorkout | null;
@@ -30,9 +24,7 @@ export const Exercise = ({
   const { exerciseId } = exercise;
 
   const suggestion = suggestions.get(exercise.name);
-  const originalExercise = dayWorkout?.exercises.find(
-    (exerciseItem) => exerciseItem.id === exerciseId
-  );
+  const originalExercise = dayWorkout?.exercises.find((exerciseItem) => exerciseItem.id === exerciseId);
 
   const addSet = () => {
     setCompletedExercises((prev) =>
@@ -40,10 +32,7 @@ export const Exercise = ({
         exerciseItem.exerciseId === exerciseId
           ? {
               ...exerciseItem,
-              sets: [
-                ...exerciseItem.sets,
-                { setNumber: exerciseItem.sets.length + 1, weight: 0, reps: 0 },
-              ],
+              sets: [...exerciseItem.sets, { setNumber: exerciseItem.sets.length + 1, weight: 0, reps: 0 }],
             }
           : exerciseItem
       )
@@ -56,28 +45,20 @@ export const Exercise = ({
         exerciseItem.exerciseId === exerciseId
           ? {
               ...exerciseItem,
-              sets: exerciseItem.sets.filter(
-                (set) => set.setNumber !== setNumber
-              ),
+              sets: exerciseItem.sets.filter((set) => set.setNumber !== setNumber),
             }
           : exerciseItem
       )
     );
   };
 
-  const updateSet = (
-    setNumber: number,
-    field: "weight" | "reps",
-    value: number
-  ) => {
+  const updateSet = (setNumber: number, field: 'weight' | 'reps', value: number) => {
     setCompletedExercises((prev) =>
       prev.map((exerciseItem) =>
         exerciseItem.exerciseId === exerciseId
           ? {
               ...exerciseItem,
-              sets: exerciseItem.sets.map((set) =>
-                set.setNumber === setNumber ? { ...set, [field]: value } : set
-              ),
+              sets: exerciseItem.sets.map((set) => (set.setNumber === setNumber ? { ...set, [field]: value } : set)),
             }
           : exerciseItem
       )
@@ -107,9 +88,7 @@ export const Exercise = ({
         </div>
 
         {suggestion?.reasoning && (
-          <p className="text-xs text-muted-foreground mt-2 italic">
-            💡 {suggestion.reasoning}
-          </p>
+          <p className="text-xs text-muted-foreground mt-2 italic">💡 {suggestion.reasoning}</p>
         )}
       </CardHeader>
 

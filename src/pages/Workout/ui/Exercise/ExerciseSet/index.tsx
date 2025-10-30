@@ -1,7 +1,7 @@
-import { Button, Input } from "@/shared/ui";
-import { ExerciseSet as ExerciseSetType } from "@/types";
-import { Minus, Plus } from "lucide-react";
-import { ChangeEvent } from "react";
+import { Minus, Plus } from 'lucide-react';
+import type { ExerciseSet as ExerciseSetType } from '@/types';
+import type { ChangeEvent } from 'react';
+import { Button, Input } from '@/shared/ui';
 
 type Props = {
   isViewMode: boolean;
@@ -9,40 +9,24 @@ type Props = {
   showRemoveButton: boolean;
   addSet: () => void;
   removeSet: () => void;
-  updateSet: (
-    setNumber: number,
-    field: "weight" | "reps",
-    value: number
-  ) => void;
+  updateSet: (setNumber: number, field: 'weight' | 'reps', value: number) => void;
 };
 
-export const ExerciseSet = ({
-  isViewMode,
-  set,
-  showRemoveButton,
-  addSet,
-  removeSet,
-  updateSet,
-}: Props) => {
+export const ExerciseSet = ({ isViewMode, set, showRemoveButton, addSet, removeSet, updateSet }: Props) => {
   const { setNumber, weight, reps } = set;
 
   const handleWeightChange = (e: ChangeEvent<HTMLInputElement>) => {
-    updateSet(setNumber, "weight", parseFloat(e.target.value) || 0);
+    updateSet(setNumber, 'weight', parseFloat(e.target.value) || 0);
   };
 
   const handleRepsChange = (e: ChangeEvent<HTMLInputElement>) => {
-    updateSet(setNumber, "reps", parseInt(e.target.value) || 0);
+    updateSet(setNumber, 'reps', parseInt(e.target.value) || 0);
   };
 
   if (isViewMode) {
     return (
-      <div
-        key={setNumber}
-        className="flex items-center gap-2 text-sm py-2 px-3 bg-muted/50 rounded-md"
-      >
-        <span className="font-medium text-muted-foreground min-w-[80px]">
-          Підхід {setNumber}:
-        </span>
+      <div key={setNumber} className="flex items-center gap-2 text-sm py-2 px-3 bg-muted/50 rounded-md">
+        <span className="font-medium text-muted-foreground min-w-[80px]">Підхід {setNumber}:</span>
 
         <span className="flex-1">
           {weight > 0 && reps > 0 ? (
@@ -52,9 +36,7 @@ export const ExerciseSet = ({
               <span className="font-medium">{reps}</span>
             </>
           ) : (
-            <span className="text-muted-foreground italic">
-              План: {reps} повторень
-            </span>
+            <span className="text-muted-foreground italic">План: {reps} повторень</span>
           )}
         </span>
       </div>
@@ -63,14 +45,12 @@ export const ExerciseSet = ({
 
   return (
     <div className="grid grid-cols-[auto_1fr_1fr_auto] gap-3 items-center">
-      <span className="text-sm font-medium text-muted-foreground min-w-[80px]">
-        Підхід {setNumber}:
-      </span>
+      <span className="text-sm font-medium text-muted-foreground min-w-[80px]">Підхід {setNumber}:</span>
 
       <div>
         <Input
           type="number"
-          value={weight || ""}
+          value={weight || ''}
           onChange={handleWeightChange}
           placeholder="Вага (кг)"
           min="0"
@@ -82,7 +62,7 @@ export const ExerciseSet = ({
       <div>
         <Input
           type="number"
-          value={reps || ""}
+          value={reps || ''}
           onChange={handleRepsChange}
           placeholder="Повторення"
           min="0"
@@ -92,22 +72,12 @@ export const ExerciseSet = ({
 
       <div className="flex gap-1">
         {showRemoveButton && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={removeSet}
-            className="h-8 w-8 p-0"
-          >
+          <Button variant="outline" size="sm" onClick={removeSet} className="h-8 w-8 p-0">
             <Minus className="h-4 w-4" />
           </Button>
         )}
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={addSet}
-          className="h-8 w-8 p-0"
-        >
+        <Button variant="outline" size="sm" onClick={addSet} className="h-8 w-8 p-0">
           <Plus className="h-4 w-4" />
         </Button>
       </div>

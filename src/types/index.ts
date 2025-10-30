@@ -3,7 +3,7 @@ export interface Exercise {
   name: string;
   sets: number;
   reps: string; // "6-10" or "8-12"
-  type?: "superset" | "dropset" | "normal";
+  type?: 'superset' | 'dropset' | 'normal';
   notes?: string;
 }
 
