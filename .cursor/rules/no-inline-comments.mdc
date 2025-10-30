@@ -1,7 +1,0 @@
----
-alwaysApply: true
----
-
-# No Inline Comments
-
-Do not use inline comments. Code should be self-documenting through clear naming and structure.
