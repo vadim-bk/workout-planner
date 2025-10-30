@@ -45,21 +45,26 @@ const importHistoryPage: RouteObject = {
     })),
 };
 
-const router = createBrowserRouter([
-  {
-    element: <ProtectedRoute permission={AuthPermission.NO_AUTH} />,
-    children: [{ path: '/login', element: <LogIn /> }],
-  },
+const router = createBrowserRouter(
+  [
+    {
+      element: <ProtectedRoute permission={AuthPermission.NO_AUTH} />,
+      children: [{ path: '/login', element: <LogIn /> }],
+    },
 
+    {
+      element: <ProtectedRoute permission={AuthPermission.AUTH} />,
+      children: [
+        {
+          element: <Layout />,
+          children: [dashboardPage, newPlanPage, workoutPage, historyPage, importHistoryPage],
+        },
+      ],
+    },
+  ],
   {
-    element: <ProtectedRoute permission={AuthPermission.AUTH} />,
-    children: [
-      {
-        element: <Layout />,
-        children: [dashboardPage, newPlanPage, workoutPage, historyPage, importHistoryPage],
-      },
-    ],
-  },
-]);
+    basename: import.meta.env.BASE_URL,
+  }
+);
 
 export const AppRouter = () => <RouterProvider router={router} />;
