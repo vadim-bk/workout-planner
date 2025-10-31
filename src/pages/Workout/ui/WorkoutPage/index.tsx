@@ -140,31 +140,33 @@ export const WorkoutPage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" onClick={() => navigate('/')}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button variant="outline" size="sm" onClick={() => navigate('/')}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold">День {day}</h1>
-          {workoutData?.plan && (
-            <p className="text-muted-foreground mt-1">
-              {workoutData.plan.weekStartDate.toLocaleDateString('uk-UA')} -{' '}
-              {workoutData.plan.weekEndDate.toLocaleDateString('uk-UA')}
-              {workoutData.existingWorkout && (
-                <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-                  Виконано {workoutData.existingWorkout.date.toLocaleDateString('uk-UA')}
-                </span>
-              )}
-            </p>
-          )}
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold">День {day}</h1>
+            {workoutData?.plan && (
+              <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
+                {workoutData.plan.weekStartDate.toLocaleDateString('uk-UA')} -{' '}
+                {workoutData.plan.weekEndDate.toLocaleDateString('uk-UA')}
+                {workoutData.existingWorkout && (
+                  <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                    Виконано {workoutData.existingWorkout.date.toLocaleDateString('uk-UA')}
+                  </span>
+                )}
+              </p>
+            )}
+          </div>
         </div>
 
         {isEditing ? (
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             {workoutData?.existingWorkout && (
-              <Button onClick={() => setIsEditing(false)} variant="outline" size="lg">
+              <Button onClick={() => setIsEditing(false)} variant="outline" size="lg" className="w-full sm:w-auto">
                 <X className="mr-2 h-5 w-5" />
                 Скасувати
               </Button>
@@ -173,13 +175,14 @@ export const WorkoutPage = () => {
               onClick={handleSave}
               disabled={saving || saveSuccess || saveWorkout.isPending || updateWorkout.isPending}
               size="lg"
+              className="w-full sm:w-auto"
             >
               <Save className="mr-2 h-5 w-5" />
               {saveSuccess ? 'Збережено! ✓' : 'Зберегти'}
             </Button>
           </div>
         ) : (
-          <Button onClick={handleEditClick} size="lg">
+          <Button onClick={handleEditClick} size="lg" className="w-full sm:w-auto">
             <Edit className="mr-2 h-5 w-5" />
             Редагувати
           </Button>

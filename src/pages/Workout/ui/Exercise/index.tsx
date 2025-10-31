@@ -68,21 +68,22 @@ export const Exercise = ({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-xl">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-lg sm:text-xl">
               {exerciseNumber}. {exercise.name}
             </CardTitle>
 
-            <CardDescription className="mt-1">
+            <CardDescription className="mt-1 text-xs sm:text-sm">
               {originalExercise?.sets} підходи × {originalExercise?.reps}
             </CardDescription>
           </div>
 
           {suggestion && (
-            <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1">
+            <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1 shrink-0">
               <Sparkles className="h-3 w-3" />
-              AI підказка
+              <span className="hidden sm:inline">AI підказка</span>
+              <span className="sm:hidden">AI</span>
             </div>
           )}
         </div>

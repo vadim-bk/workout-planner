@@ -25,13 +25,13 @@ export const ExerciseSet = ({ isViewMode, set, showRemoveButton, addSet, removeS
 
   if (isViewMode) {
     return (
-      <div key={setNumber} className="flex items-center gap-2 text-sm py-2 px-3 bg-muted/50 rounded-md">
-        <span className="font-medium text-muted-foreground min-w-[80px]">Підхід {setNumber}:</span>
+      <div key={setNumber} className="flex items-center gap-2 text-xs sm:text-sm py-2 px-3 bg-muted/50 rounded-md">
+        <span className="font-medium text-muted-foreground min-w-[60px] sm:min-w-[80px]">Підхід {setNumber}:</span>
 
         <span className="flex-1">
           {weight > 0 && reps > 0 ? (
             <>
-              <span className="font-bold text-lg">{weight} кг</span>
+              <span className="font-bold text-base sm:text-lg">{weight} кг</span>
               <span className="mx-2 text-muted-foreground">×</span>
               <span className="font-medium">{reps}</span>
             </>
@@ -44,18 +44,20 @@ export const ExerciseSet = ({ isViewMode, set, showRemoveButton, addSet, removeS
   }
 
   return (
-    <div className="grid grid-cols-[auto_1fr_1fr_auto] gap-3 items-center">
-      <span className="text-sm font-medium text-muted-foreground min-w-[80px]">Підхід {setNumber}:</span>
+    <div className="grid grid-cols-[auto_1fr_1fr_auto] gap-2 sm:gap-3 items-center">
+      <span className="text-xs sm:text-sm font-medium text-muted-foreground min-w-[60px] sm:min-w-[80px]">
+        Підхід {setNumber}:
+      </span>
 
       <div>
         <Input
           type="number"
           value={weight || ''}
           onChange={handleWeightChange}
-          placeholder="Вага (кг)"
+          placeholder="Вага"
           min="0"
           step="0.5"
-          className="text-center"
+          className="text-center text-sm"
         />
       </div>
 
@@ -66,7 +68,7 @@ export const ExerciseSet = ({ isViewMode, set, showRemoveButton, addSet, removeS
           onChange={handleRepsChange}
           placeholder="Повторення"
           min="0"
-          className="text-center"
+          className="text-center text-sm"
         />
       </div>
 

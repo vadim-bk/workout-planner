@@ -109,10 +109,10 @@ export const HistoryPage = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Історія тренувань</h1>
-        <p className="text-muted-foreground mt-1">Переглядайте ваш прогрес та статистику</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Історія тренувань</h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">Переглядайте ваш прогрес та статистику</p>
       </div>
 
       {history.length === 0 ? (
@@ -132,14 +132,14 @@ export const HistoryPage = () => {
             </CardHeader>
 
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                 {exerciseNames.map((name) => (
                   <Button
                     key={name}
                     variant={selectedExercise === name ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedExercise(name)}
-                    className="justify-start text-left h-auto py-2 px-3"
+                    className="justify-start text-left h-auto py-2 px-2 sm:px-3"
                   >
                     <span className="truncate text-xs">{name}</span>
                   </Button>
@@ -158,11 +158,11 @@ export const HistoryPage = () => {
               </CardHeader>
 
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} className="sm:h-[300px]">
                   <LineChart data={getChartData(selectedExercise)}>
                     <CartesianGrid strokeDasharray="3 3" />
 
-                    <XAxis dataKey="date" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
 
                     <YAxis
                       label={{
@@ -170,11 +170,12 @@ export const HistoryPage = () => {
                         angle: -90,
                         position: 'insideLeft',
                       }}
+                      tick={{ fontSize: 12 }}
                     />
 
                     <Tooltip />
 
-                    <Legend />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
 
                     <Line type="monotone" dataKey="maxWeight" stroke="#3b82f6" name="Макс. вага" strokeWidth={2} />
 

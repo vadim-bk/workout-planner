@@ -9,16 +9,16 @@ export const LogIn = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">💪 Workout Planner</CardTitle>
+          <CardTitle className="text-2xl sm:text-3xl font-bold">💪 Workout Planner</CardTitle>
 
-          <CardDescription className="text-base mt-2">
+          <CardDescription className="text-sm sm:text-base mt-2">
             Керуйте своїми тренуваннями та відстежуйте прогрес
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground text-center">
               Увійдіть, щоб почати відстежувати свої тренування
             </p>
           </div>
@@ -28,7 +28,7 @@ export const LogIn = () => {
             Увійти через Google
           </Button>
 
-          <div className="text-xs text-center text-muted-foreground pt-4">
+          <div className="text-xs text-center text-muted-foreground pt-4 space-y-1">
             <p>✓ AI підказки для ваги</p>
             <p>✓ Історія тренувань</p>
             <p>✓ Графіки прогресу</p>

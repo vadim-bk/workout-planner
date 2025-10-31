@@ -91,15 +91,17 @@ export const ImportHistoryPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <div className="flex items-center gap-2 sm:gap-4">
         <Button variant="outline" size="sm" onClick={() => navigate('/')}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
         <div>
-          <h1 className="text-3xl font-bold">Імпорт історії тренувань</h1>
-          <p className="text-muted-foreground mt-1">Додайте дані про минулі тренування для кращих AI підказок</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Імпорт історії тренувань</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+            Додайте дані про минулі тренування для кращих AI підказок
+          </p>
         </div>
       </div>
 
@@ -139,15 +141,15 @@ export const ImportHistoryPage = () => {
           <Textarea
             {...register('rawText', { required: true })}
             placeholder={`Приклад формату:\n\nТиждень: 14.10.2024 - 20.10.2024\n\nДень 1\n1. Присідання зі штангою – 3×8-12\n100 кг × 12\n100 кг × 10\n\n2. Жим ногами – 3×10-15\n150 кг × 15\n\nДень 2\n1. Жим штанги лежачи – 3×8-12\n80 кг × 12\n\nНатисніть "Показати приклад" для детального формату`}
-            className="min-h-[400px] font-mono text-sm"
+            className="min-h-[300px] sm:min-h-[400px] font-mono text-xs sm:text-sm"
           />
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button
               onClick={handleImport}
               disabled={!formState.isValid || saveWorkoutHistory.isPending}
               size="lg"
-              className="flex-1"
+              className="flex-1 w-full sm:w-auto"
             >
               {saveWorkoutHistory.isPending ? (
                 <>
@@ -157,12 +159,18 @@ export const ImportHistoryPage = () => {
               ) : (
                 <>
                   <Upload className="mr-2 h-4 w-4" />
-                  Імпортувати тренування
+                  <span className="hidden sm:inline">Імпортувати тренування</span>
+                  <span className="sm:hidden">Імпортувати</span>
                 </>
               )}
             </Button>
 
-            <Button onClick={() => setShowExample(!showExample)} variant="outline" size="lg">
+            <Button
+              onClick={() => setShowExample(!showExample)}
+              variant="outline"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
               <Info className="mr-2 h-4 w-4" />
               {showExample ? 'Сховати приклад' : 'Показати приклад'}
             </Button>

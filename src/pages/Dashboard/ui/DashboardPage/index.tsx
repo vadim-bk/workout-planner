@@ -11,17 +11,20 @@ export const DashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Головна</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Головна</h1>
 
-          <p className="text-muted-foreground mt-1">Вітаємо, {user?.displayName?.split(' ')[0] || 'спортсмене'}! 💪</p>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+            Вітаємо, {user?.displayName?.split(' ')[0] || 'спортсмене'}! 💪
+          </p>
         </div>
 
-        <Link to="/new-plan">
-          <Button size="lg">
+        <Link to="/new-plan" className="w-full sm:w-auto">
+          <Button size="lg" className="w-full sm:w-auto">
             <Plus className="mr-2 h-5 w-5" />
-            Додати новий план
+            <span className="hidden sm:inline">Додати новий план</span>
+            <span className="sm:hidden">Новий план</span>
           </Button>
         </Link>
       </div>

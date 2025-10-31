@@ -120,10 +120,10 @@ export const NewPlanPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Новий план тренувань</h1>
-        <p className="text-muted-foreground mt-1">Вставте текст плану від вашого тренера</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Новий план тренувань</h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">Вставте текст плану від вашого тренера</p>
       </div>
 
       {error && (
@@ -140,7 +140,7 @@ export const NewPlanPage = () => {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Початок тижня</label>
 
@@ -160,7 +160,7 @@ export const NewPlanPage = () => {
             <Textarea
               {...register('rawText', { required: true })}
               placeholder="День 1&#10;&#10;1. Бруси&#10;За потреби беріть додаткову вагу 3 підходів по 5-8 &#10;&#10;2. Тяга однієї гантелі під нахилом&#10;3 підходи по 6-10 &#10;..."
-              className="min-h-[300px] font-mono text-sm"
+              className="min-h-[200px] sm:min-h-[300px] font-mono text-xs sm:text-sm"
             />
           </div>
 
@@ -182,14 +182,14 @@ export const NewPlanPage = () => {
           </CardHeader>
 
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {parsedPlan.days.map((day) => (
-                <div key={day.day} className="border rounded-lg p-4">
-                  <h3 className="font-bold text-lg mb-3">День {day.day}</h3>
+                <div key={day.day} className="border rounded-lg p-3 sm:p-4">
+                  <h3 className="font-bold text-base sm:text-lg mb-2 sm:mb-3">День {day.day}</h3>
 
                   <div className="space-y-2">
                     {day.exercises.map((ex, idx) => (
-                      <div key={ex.id} className="flex items-start gap-2 text-sm">
+                      <div key={ex.id} className="flex items-start gap-2 text-xs sm:text-sm">
                         <span className="font-medium text-muted-foreground min-w-6">{idx + 1}.</span>
 
                         <div className="flex-1">
@@ -211,24 +211,26 @@ export const NewPlanPage = () => {
               ))}
             </div>
 
-            <div className="mt-6 flex flex-col gap-3">
+            <div className="mt-4 sm:mt-6 flex flex-col gap-3">
               <Button
                 onClick={handleSaveAndGenerateAI}
                 disabled={
                   generateWeightSuggestions.isPending || saveWorkoutPlan.isPending || saveAISuggestions.isPending
                 }
                 size="lg"
-                className="w-full"
+                className="w-full text-sm sm:text-base"
               >
                 {generateWeightSuggestions.isPending || saveWorkoutPlan.isPending || saveAISuggestions.isPending ? (
                   <>
                     <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                    Генерація AI підказок...
+                    <span className="hidden sm:inline">Генерація AI підказок...</span>
+                    <span className="sm:hidden">Генерація...</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Зберегти та отримати AI підказки
+                    <span className="hidden sm:inline">Зберегти та отримати AI підказки</span>
+                    <span className="sm:hidden">Зберегти з AI</span>
                   </>
                 )}
               </Button>
@@ -238,7 +240,7 @@ export const NewPlanPage = () => {
                 disabled={saveWorkoutPlan.isPending}
                 size="lg"
                 variant="outline"
-                className="w-full"
+                className="w-full text-sm sm:text-base"
               >
                 <Save className="mr-2 h-4 w-4" />
                 Зберегти без AI підказок
