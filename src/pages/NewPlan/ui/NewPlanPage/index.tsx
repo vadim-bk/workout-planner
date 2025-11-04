@@ -100,11 +100,17 @@ export const NewPlanPage = () => {
             },
             onError: (err: unknown) => {
               const message = (err as { status?: number; message?: string }) || {};
-              if (message.status === 429 || message.message?.includes('429') || message.message?.includes('quota')) {
+              const errorMessage = message.message || '';
+
+              if (errorMessage.includes('API key is not configured') || errorMessage.includes('VITE_OPENAI_API_KEY')) {
+                setError(
+                  '❌ OpenAI API ключ не налаштовано. Натисніть "Зберегти без AI підказок" або налаштуйте API ключ для використання AI функцій.'
+                );
+              } else if (message.status === 429 || errorMessage.includes('429') || errorMessage.includes('quota')) {
                 setError(
                   "❌ OpenAI Rate Limit: У вас закінчилися кредити. Додайте кредити на platform.openai.com/settings/organization/billing або натисніть 'Зберегти без AI' нижче."
                 );
-              } else if (message.message?.includes('OpenAI') || message.message?.includes('API')) {
+              } else if (errorMessage.includes('OpenAI') || errorMessage.includes('API')) {
                 setError('❌ Помилка OpenAI API. Перевірте ключ у .env файлі або збережіть без AI підказок.');
               } else {
                 setError('Помилка при збереженні плану. Перевірте налаштування Firebase та OpenAI API.');

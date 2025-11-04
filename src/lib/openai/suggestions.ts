@@ -1,10 +1,20 @@
 import OpenAI from 'openai';
 import type { WeeklyPlan, WorkoutHistory, AISuggestion } from '@/types';
 
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true, // Note: In production, use a backend proxy
-});
+function getOpenAIClient() {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+  if (!apiKey || apiKey.trim() === '') {
+    throw new Error(
+      'OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY environment variable or use "Save without AI" option.'
+    );
+  }
+
+  return new OpenAI({
+    apiKey,
+    dangerouslyAllowBrowser: true,
+  });
+}
 
 export async function generateWeightSuggestions(
   newPlan: WeeklyPlan,
@@ -84,6 +94,7 @@ ${newPlanText}
 ВАЖЛИВО: Кількість елементів у suggestedWeights та suggestedReps має точно відповідати кількості підходів у плані!`;
 
   try {
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
