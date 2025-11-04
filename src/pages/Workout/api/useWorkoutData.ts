@@ -22,8 +22,8 @@ export const useWorkoutData = (planId: string | undefined, day: string | undefin
       }
 
       const plan: WeeklyPlan = {
-        id: planDoc.id,
         ...planDoc.data(),
+        id: planDoc.id,
         weekStartDate: planDoc.data().weekStartDate.toDate(),
         weekEndDate: planDoc.data().weekEndDate.toDate(),
         createdAt: planDoc.data().createdAt.toDate(),
@@ -43,8 +43,8 @@ export const useWorkoutData = (planId: string | undefined, day: string | undefin
       const existingWorkout = historySnapshot.empty
         ? null
         : ({
-            id: historySnapshot.docs[0].id,
             ...historySnapshot.docs[0].data(),
+            id: historySnapshot.docs[0].id,
             date: historySnapshot.docs[0].data().date.toDate(),
           } as WorkoutHistory);
 

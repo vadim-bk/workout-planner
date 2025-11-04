@@ -20,8 +20,8 @@ export const useAISuggestions = (userId: string | undefined, weekPlanId: string 
       snapshot.docs.forEach((doc) => {
         const data = doc.data();
         suggestionsMap.set(data.exerciseName, {
-          id: doc.id,
           ...data,
+          id: doc.id,
           createdAt: data.createdAt.toDate(),
         } as AISuggestion);
       });

@@ -24,8 +24,8 @@ export const useCurrentPlan = (userId: string | undefined) => {
       const doc = snapshot.docs[0];
 
       return {
-        id: doc.id,
         ...doc.data(),
+        id: doc.id,
         weekStartDate: doc.data().weekStartDate.toDate(),
         weekEndDate: doc.data().weekEndDate.toDate(),
         createdAt: doc.data().createdAt.toDate(),

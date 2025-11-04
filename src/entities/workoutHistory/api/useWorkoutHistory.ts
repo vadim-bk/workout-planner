@@ -16,8 +16,8 @@ export const useWorkoutHistory = (userId: string | undefined) => {
         orderBy('date', 'desc')
       );
       return snapshot.docs.map((doc) => ({
-        id: doc.id,
         ...doc.data(),
+        id: doc.id,
         date: doc.data().date.toDate(),
       })) as WorkoutHistory[];
     },
