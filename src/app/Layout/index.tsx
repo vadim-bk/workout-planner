@@ -1,4 +1,4 @@
-import { Home, Plus, History, LogOut, Upload, Menu, X } from 'lucide-react';
+import { Plus, History, LogOut, Upload, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { Outlet, useNavigate, Link } from 'react-router';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,12 +11,6 @@ type NavigationItem = {
 };
 
 const navigationItems: NavigationItem[] = [
-  {
-    label: 'Головна',
-    IconComponent: Home,
-    to: '/',
-  },
-
   {
     label: 'Новий план',
     IconComponent: Plus,
@@ -51,7 +45,7 @@ export const Layout = () => {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link to="/" className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-              <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Logo" className="h-10 w-10" />
+              <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="Logo" className="h-15 w-20" />
             </Link>
 
             <div className="hidden md:flex items-center gap-2">
