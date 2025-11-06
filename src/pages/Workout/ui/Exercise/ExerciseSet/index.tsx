@@ -31,7 +31,7 @@ export const ExerciseSet = ({ isViewMode, set, showRemoveButton, addSet, removeS
         <span className="flex-1">
           {weight > 0 && reps > 0 ? (
             <>
-              <span className="font-bold text-base sm:text-lg">{weight} кг</span>
+              <span className="font-bold text-sm sm:text-md">{weight} кг</span>
               <span className="mx-2 text-muted-foreground">×</span>
               <span className="font-medium">{reps}</span>
             </>

@@ -11,8 +11,6 @@ type Props = {
 };
 
 export const CurrentPlan = ({ currentPlan, isLoading }: Props) => {
-  console.log(currentPlan);
-
   if (isLoading) {
     return <Loader />;
   }

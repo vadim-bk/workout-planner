@@ -1,8 +1,8 @@
-import { Sparkles } from 'lucide-react';
+import { Edit, X, Save } from 'lucide-react';
 import { ExerciseSet } from './ExerciseSet';
 import type { CompletedExercise, DayWorkout, AISuggestion } from '@/types';
 import type { Dispatch, SetStateAction } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from '@/shared/ui';
 
 type Props = {
   dayWorkout: DayWorkout | null;
@@ -11,6 +11,10 @@ type Props = {
   isEditing: boolean;
   suggestions: Map<string, AISuggestion>;
   setCompletedExercises: Dispatch<SetStateAction<CompletedExercise[]>>;
+  onToggleEdit: () => void;
+  onSave: () => void;
+  saving: boolean;
+  saveSuccess: boolean;
 };
 
 export const Exercise = ({
@@ -20,6 +24,10 @@ export const Exercise = ({
   isEditing,
   suggestions,
   setCompletedExercises,
+  onToggleEdit,
+  onSave,
+  saving,
+  saveSuccess,
 }: Props) => {
   const { exerciseId } = exercise;
 
@@ -79,12 +87,23 @@ export const Exercise = ({
             </CardDescription>
           </div>
 
-          {suggestion && (
-            <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1 shrink-0">
-              <Sparkles className="h-3 w-3" />
-              <span className="hidden sm:inline">AI підказка</span>
-              <span className="sm:hidden">AI</span>
-            </div>
+          {isEditing ? (
+            <>
+              <Button onClick={onSave} disabled={saving || saveSuccess} size="sm" className="h-8">
+                <Save className="mr-1 h-4 w-4" />
+                <span className="hidden sm:inline">{saveSuccess ? 'Збережено! ✓' : 'Зберегти'}</span>
+                <span className="sm:hidden">{saveSuccess ? '✓' : 'Зберегти'}</span>
+              </Button>
+              <Button onClick={onToggleEdit} variant="outline" size="sm" className="h-8">
+                <X className="mr-1 h-4 w-4" />
+                <span className="hidden sm:inline">Скасувати</span>
+              </Button>
+            </>
+          ) : (
+            <Button onClick={onToggleEdit} variant="default" size="sm" className="h-8">
+              <Edit className="mr-1 h-4 w-4" />
+              <span className="hidden sm:inline">Редагувати</span>
+            </Button>
           )}
         </div>
 

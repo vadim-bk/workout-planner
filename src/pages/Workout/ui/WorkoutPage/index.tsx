@@ -1,4 +1,4 @@
-import { Save, ChevronLeft, Edit, X } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useAISuggestions } from '../../api/useAISuggestions';
@@ -17,7 +17,7 @@ export const WorkoutPage = () => {
   const [completedExercises, setCompletedExercises] = useState<CompletedExercise[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [editingExercises, setEditingExercises] = useState<Set<string>>(new Set());
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const { data: workoutData, isLoading: loading, error: workoutError } = useWorkoutData(planId, day, user?.uid);
@@ -34,10 +34,10 @@ export const WorkoutPage = () => {
       let initialExercises: CompletedExercise[];
 
       if (existingWorkout) {
-        setIsEditing(false);
+        setEditingExercises(new Set());
         initialExercises = existingWorkout.exercises;
       } else {
-        setIsEditing(false);
+        setEditingExercises(new Set());
         initialExercises = dayWorkout.exercises.map((ex) => ({
           exerciseId: ex.id,
           name: ex.name,
@@ -77,8 +77,16 @@ export const WorkoutPage = () => {
     }
   }, [workoutError, navigate]);
 
-  const handleEditClick = () => {
-    setIsEditing(true);
+  const handleToggleExerciseEdit = (exerciseId: string) => {
+    setEditingExercises((prev) => {
+      const next = new Set(prev);
+      if (next.has(exerciseId)) {
+        next.delete(exerciseId);
+      } else {
+        next.add(exerciseId);
+      }
+      return next;
+    });
   };
 
   const handleSave = () => {
@@ -92,7 +100,7 @@ export const WorkoutPage = () => {
 
     const onCommonSuccess = () => {
       setSaveSuccess(true);
-      setIsEditing(false);
+      setEditingExercises(new Set());
       setTimeout(() => setSaveSuccess(false), 2000);
     };
 
@@ -162,31 +170,6 @@ export const WorkoutPage = () => {
             )}
           </div>
         </div>
-
-        {isEditing ? (
-          <div className="flex flex-col sm:flex-row gap-2">
-            {workoutData?.existingWorkout && (
-              <Button onClick={() => setIsEditing(false)} variant="outline" size="lg" className="w-full sm:w-auto">
-                <X className="mr-2 h-5 w-5" />
-                Скасувати
-              </Button>
-            )}
-            <Button
-              onClick={handleSave}
-              disabled={saving || saveSuccess || saveWorkout.isPending || updateWorkout.isPending}
-              size="lg"
-              className="w-full sm:w-auto"
-            >
-              <Save className="mr-2 h-5 w-5" />
-              {saveSuccess ? 'Збережено! ✓' : 'Зберегти'}
-            </Button>
-          </div>
-        ) : (
-          <Button onClick={handleEditClick} size="lg" className="w-full sm:w-auto">
-            <Edit className="mr-2 h-5 w-5" />
-            Редагувати
-          </Button>
-        )}
       </div>
 
       {saveSuccess && (
@@ -208,9 +191,13 @@ export const WorkoutPage = () => {
             dayWorkout={workoutData?.dayWorkout || null}
             exercise={exercise}
             exerciseNumber={exerciseIdx + 1}
-            isEditing={isEditing}
+            isEditing={editingExercises.has(exercise.exerciseId)}
             suggestions={suggestions}
             setCompletedExercises={setCompletedExercises}
+            onToggleEdit={() => handleToggleExerciseEdit(exercise.exerciseId)}
+            onSave={handleSave}
+            saving={saving || saveWorkout.isPending || updateWorkout.isPending}
+            saveSuccess={saveSuccess}
           />
         ))}
       </div>
