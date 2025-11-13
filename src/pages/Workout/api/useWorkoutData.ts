@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { where } from 'firebase/firestore';
 import type { WeeklyPlan, DayWorkout, WorkoutHistory } from '@/types';
-import { getCollectionDocs, getDocument } from '@/lib/firebase/config';
+import { getCollectionDocs, getDocument } from '@/lib/firebase';
 
 export const useWorkoutData = (planId: string | undefined, day: string | undefined, userId: string | undefined) => {
   return useQuery({

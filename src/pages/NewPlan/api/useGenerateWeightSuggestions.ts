@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import type { WeeklyPlan, WorkoutHistory } from '@/types';
-import { generateWeightSuggestions } from '@/lib/openai/suggestions';
+import { generateWeightSuggestions } from '@/lib/openai';
 
 export const useGenerateWeightSuggestions = () => {
   return useMutation({

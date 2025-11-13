@@ -2,7 +2,7 @@ import { Plus, Calendar, History as HistoryIcon } from 'lucide-react';
 import { Link } from 'react-router';
 import { EmptyPlan } from './EmptyPlan';
 import type { WeeklyPlan } from '@/types';
-import { formatShortDate } from '@/lib/utils';
+import { formatShortDate } from '@/lib/date';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Loader, Button } from '@/shared/ui';
 
 type Props = {

@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import type { WorkoutHistory } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkoutHistory } from '@/entities/workoutHistory';
-import { formatShortDate } from '@/lib/utils';
+import { formatShortDate } from '@/lib/date';
 import {
   Card,
   CardContent,

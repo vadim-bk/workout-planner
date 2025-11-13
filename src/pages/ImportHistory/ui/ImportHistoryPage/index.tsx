@@ -39,7 +39,16 @@ export const ImportHistoryPage = () => {
 
     setImportResult(null);
 
-    const workouts = parseHistoryWorkouts(rawText);
+    let workouts;
+    try {
+      workouts = parseHistoryWorkouts(rawText);
+    } catch {
+      setImportResult({
+        success: false,
+        message: 'Не вдалося знайти тренування в тексті. Перевірте формат даних.',
+      });
+      return;
+    }
 
     if (workouts.length === 0) {
       setImportResult({

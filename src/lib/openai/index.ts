@@ -1,0 +1,1 @@
+export { generateWeightSuggestions } from './suggestions';

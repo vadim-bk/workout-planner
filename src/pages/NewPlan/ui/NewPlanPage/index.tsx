@@ -148,22 +148,29 @@ export const NewPlanPage = () => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Початок тижня</label>
+              <label htmlFor="weekStart" className="text-sm font-medium mb-2 block">
+                Початок тижня
+              </label>
 
-              <Input type="date" {...register('weekStart', { required: true })} />
+              <Input id="weekStart" type="date" {...register('weekStart', { required: true })} />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Кінець тижня</label>
+              <label htmlFor="weekEnd" className="text-sm font-medium mb-2 block">
+                Кінець тижня
+              </label>
 
-              <Input type="date" {...register('weekEnd', { required: true })} />
+              <Input id="weekEnd" type="date" {...register('weekEnd', { required: true })} />
             </div>
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Текст плану</label>
+            <label htmlFor="rawText" className="text-sm font-medium mb-2 block">
+              Текст плану
+            </label>
 
             <Textarea
+              id="rawText"
               {...register('rawText', { required: true })}
               placeholder="День 1&#10;&#10;1. Бруси&#10;За потреби беріть додаткову вагу 3 підходів по 5-8 &#10;&#10;2. Тяга однієї гантелі під нахилом&#10;3 підходи по 6-10 &#10;..."
               className="min-h-[200px] sm:min-h-[300px] font-mono text-xs sm:text-sm"

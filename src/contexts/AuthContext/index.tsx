@@ -5,16 +5,16 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import type { ReactNode } from 'react';
 import { auth, googleProvider } from '@/lib/firebase/config';
 
-interface AuthContextType {
+type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-}
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,9 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signOut }}>{children}</AuthContext.Provider>;
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
 
   if (context === undefined) {
@@ -65,4 +65,4 @@ export function useAuth() {
   }
 
   return context;
-}
+};
