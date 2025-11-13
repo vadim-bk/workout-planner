@@ -138,3 +138,85 @@ it('shows success message after successful import', async () => {
     expect(screen.getByText(/Успішно імпортовано/i)).toBeInTheDocument();
   });
 });
+
+it('shows error when parsing fails with empty result', async () => {
+  render();
+
+  const textInput = screen.getByRole('textbox') as HTMLTextAreaElement;
+  const importButton = screen.getByRole('button', { name: /Імпортувати/i });
+
+  await user.type(textInput, 'Some invalid text');
+  await waitFor(() => expect(importButton).not.toBeDisabled());
+
+  await user.click(importButton);
+  await waitFor(() => expect(screen.getByText(/Не вдалося знайти тренування в тексті/i)).toBeInTheDocument());
+});
+
+it('shows partial success message when some imports fail', async () => {
+  mockSaveHistory.mockImplementation(() => Promise.reject(new Error('Failed')));
+  mockSaveHistory.mockResolvedValueOnce({ id: 'test-id' });
+  mockSaveHistory.mockRejectedValueOnce(new Error('Failed'));
+
+  render();
+
+  const textInput = screen.getByRole('textbox') as HTMLTextAreaElement;
+  const importButton = screen.getByRole('button', { name: /Імпортувати/i });
+
+  const historyText = `Тиждень: 25.08.2024 - 31.08.2024
+
+День 1
+1. Присідання зі штангою – 3×8-12
+100 кг × 12
+
+День 2
+1. Жим ногами – 3×10-15
+150 кг × 15`;
+
+  await user.type(textInput, historyText);
+  await waitFor(() => expect(importButton).not.toBeDisabled());
+
+  await user.click(importButton);
+  await waitFor(() => expect(screen.getByText(/Частково імпортовано/i)).toBeInTheDocument());
+});
+
+it('shows error when all imports fail', async () => {
+  mockSaveHistory.mockRejectedValue(new Error('Failed'));
+
+  render();
+
+  const textInput = screen.getByRole('textbox') as HTMLTextAreaElement;
+  const importButton = screen.getByRole('button', { name: /Імпортувати/i });
+
+  const historyText = `Тиждень: 25.08.2024 - 31.08.2024
+
+День 1
+1. Присідання зі штангою – 3×8-12
+100 кг × 12`;
+
+  await user.type(textInput, historyText);
+  await waitFor(() => expect(importButton).not.toBeDisabled());
+
+  await user.click(importButton);
+  await waitFor(() => expect(screen.getByText(/Помилка при імпорті тренувань/i)).toBeInTheDocument());
+});
+
+it('clears textarea after successful import', async () => {
+  mockSaveHistory.mockResolvedValue({ id: 'test-id' });
+
+  render();
+
+  const textInput = screen.getByRole('textbox') as HTMLTextAreaElement;
+  const importButton = screen.getByRole('button', { name: /Імпортувати/i });
+
+  const historyText = `Тиждень: 25.08.2024 - 31.08.2024
+
+День 1
+1. Присідання зі штангою – 3×8-12
+100 кг × 12`;
+
+  await user.type(textInput, historyText);
+  await waitFor(() => expect(importButton).not.toBeDisabled());
+
+  await user.click(importButton);
+  await waitFor(() => expect(textInput.value).toBe(''));
+});

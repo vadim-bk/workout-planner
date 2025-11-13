@@ -4,8 +4,8 @@ import type { WorkoutHistory } from '@/types';
 import { getCollectionDocs } from '@/lib/firebase';
 import { queryKeys } from '@/shared/api';
 
-export const useWorkoutHistory = (userId: string | undefined) => {
-  return useQuery({
+export const useWorkoutHistory = (userId: string | undefined) =>
+  useQuery({
     queryKey: queryKeys.workoutHistory(userId || ''),
     queryFn: async (): Promise<WorkoutHistory[]> => {
       if (!userId) return [];
@@ -15,6 +15,7 @@ export const useWorkoutHistory = (userId: string | undefined) => {
         where('userId', '==', userId),
         orderBy('date', 'desc')
       );
+
       return snapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
@@ -23,4 +24,3 @@ export const useWorkoutHistory = (userId: string | undefined) => {
     },
     enabled: !!userId,
   });
-};

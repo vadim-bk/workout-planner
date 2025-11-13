@@ -3,9 +3,10 @@ import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from 
 import { it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AuthProvider, useAuth } from '.';
 import { auth, googleProvider } from '@/lib/firebase/config';
-import { ErrorBoundary } from '@/shared/ui/error-boundary';
+import { ErrorBoundary } from '@/shared/ui';
 
 const originalError = console.error;
+const originalStderrWrite = process.stderr.write.bind(process.stderr);
 
 vi.mock('@/lib/firebase/config', () => ({
   auth: {},
@@ -51,10 +52,18 @@ beforeEach(() => {
     return unsubscribe;
   });
   console.error = vi.fn();
+  process.stderr.write = vi.fn((chunk: string | Uint8Array) => {
+    const message = typeof chunk === 'string' ? chunk : chunk.toString();
+    if (message.includes('useAuth must be used within an AuthProvider')) {
+      return true;
+    }
+    return originalStderrWrite(chunk);
+  });
 });
 
 afterEach(() => {
   console.error = originalError;
+  process.stderr.write = originalStderrWrite;
 });
 
 it('provides auth context and initializes loading state', async () => {

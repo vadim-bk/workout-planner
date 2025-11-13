@@ -166,3 +166,228 @@ it('saves plan without AI', async () => {
     expect(mockSavePlan).toHaveBeenCalled();
   });
 });
+
+it('shows error when saving plan fails', async () => {
+  mockSavePlan.mockImplementation((_, options) => {
+    options?.onError?.();
+  });
+
+  render();
+
+  const weekStartInput = screen.getByLabelText(/Початок тижня/i) as HTMLInputElement;
+  const weekEndInput = screen.getByLabelText(/Кінець тижня/i) as HTMLInputElement;
+  const textInput = screen.getByRole('textbox', { name: /Текст плану/i }) as HTMLTextAreaElement;
+  const parseButton = screen.getByRole('button', { name: /Переглянути план/i });
+
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  act(() => {
+    fireEvent.change(weekStartInput, { target: { value: weekStart.toISOString().split('T')[0] } });
+    fireEvent.change(weekEndInput, { target: { value: weekEnd.toISOString().split('T')[0] } });
+  });
+  await user.type(
+    textInput,
+    `День 1
+1. Присідання зі штангою
+3 підходи по 8-12`
+  );
+
+  await waitFor(() => {
+    expect(parseButton).not.toBeDisabled();
+  });
+
+  await user.click(parseButton);
+
+  await waitFor(() => {
+    expect(screen.getByText(/Розпізнаний план/i)).toBeInTheDocument();
+  });
+
+  const saveButton = screen.getByRole('button', { name: /Зберегти без AI підказок/i });
+  await user.click(saveButton);
+
+  await waitFor(() => {
+    expect(screen.getByText(/Помилка при збереженні плану/i)).toBeInTheDocument();
+  });
+});
+
+it('shows error when OpenAI API key is not configured', async () => {
+  const mockSavedPlan = { id: 'saved-plan-123', userId: 'user-123' };
+  mockSavePlan.mockImplementation((_, options) => {
+    options?.onSuccess?.(mockSavedPlan);
+  });
+
+  const apiKeyError = new Error('OpenAI API key is not configured');
+  mockGenerateSuggestions.mockImplementation((_, options) => {
+    options?.onError?.(apiKeyError);
+  });
+
+  render();
+
+  const weekStartInput = screen.getByLabelText(/Початок тижня/i) as HTMLInputElement;
+  const weekEndInput = screen.getByLabelText(/Кінець тижня/i) as HTMLInputElement;
+  const textInput = screen.getByRole('textbox', { name: /Текст плану/i }) as HTMLTextAreaElement;
+  const parseButton = screen.getByRole('button', { name: /Переглянути план/i });
+
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  act(() => {
+    fireEvent.change(weekStartInput, { target: { value: weekStart.toISOString().split('T')[0] } });
+    fireEvent.change(weekEndInput, { target: { value: weekEnd.toISOString().split('T')[0] } });
+  });
+  await user.type(
+    textInput,
+    `День 1
+1. Присідання зі штангою
+3 підходи по 8-12`
+  );
+
+  await waitFor(() => {
+    expect(parseButton).not.toBeDisabled();
+  });
+
+  await user.click(parseButton);
+
+  await waitFor(() => {
+    expect(screen.getByText(/Розпізнаний план/i)).toBeInTheDocument();
+  });
+
+  const saveButton = screen.getByRole('button', { name: /Зберегти та отримати AI підказки/i });
+  await user.click(saveButton);
+
+  await waitFor(() => {
+    expect(screen.getByText(/OpenAI API ключ не налаштовано/i)).toBeInTheDocument();
+  });
+});
+
+it('shows error when OpenAI rate limit is exceeded', async () => {
+  const mockSavedPlan = { id: 'saved-plan-123', userId: 'user-123' };
+  mockSavePlan.mockImplementation((_, options) => {
+    options?.onSuccess?.(mockSavedPlan);
+  });
+
+  const rateLimitError = { status: 429, message: 'Rate limit exceeded' };
+  mockGenerateSuggestions.mockImplementation((_, options) => {
+    options?.onError?.(rateLimitError);
+  });
+
+  render();
+
+  const weekStartInput = screen.getByLabelText(/Початок тижня/i) as HTMLInputElement;
+  const weekEndInput = screen.getByLabelText(/Кінець тижня/i) as HTMLInputElement;
+  const textInput = screen.getByRole('textbox', { name: /Текст плану/i }) as HTMLTextAreaElement;
+  const parseButton = screen.getByRole('button', { name: /Переглянути план/i });
+
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  act(() => {
+    fireEvent.change(weekStartInput, { target: { value: weekStart.toISOString().split('T')[0] } });
+    fireEvent.change(weekEndInput, { target: { value: weekEnd.toISOString().split('T')[0] } });
+  });
+  await user.type(
+    textInput,
+    `День 1
+1. Присідання зі штангою
+3 підходи по 8-12`
+  );
+
+  await waitFor(() => {
+    expect(parseButton).not.toBeDisabled();
+  });
+
+  await user.click(parseButton);
+
+  await waitFor(() => {
+    expect(screen.getByText(/Розпізнаний план/i)).toBeInTheDocument();
+  });
+
+  const saveButton = screen.getByRole('button', { name: /Зберегти та отримати AI підказки/i });
+  await user.click(saveButton);
+
+  await waitFor(() => {
+    expect(screen.getByText(/OpenAI Rate Limit/i)).toBeInTheDocument();
+  });
+});
+
+it('shows error when saving AI suggestions fails', async () => {
+  const mockSavedPlan = { id: 'saved-plan-123', userId: 'user-123' };
+  mockSavePlan.mockImplementation((_, options) => {
+    options?.onSuccess?.(mockSavedPlan);
+  });
+
+  const suggestionsMap = new Map([
+    [
+      'Присідання зі штангою',
+      {
+        id: 'suggestion-1',
+        userId: 'user-123',
+        weekPlanId: 'plan-123',
+        exerciseName: 'Присідання зі штангою',
+        suggestedWeights: [100, 105, 110],
+        suggestedReps: [15, 12, 10],
+        reasoning: 'Test',
+        createdAt: new Date(),
+      },
+    ],
+  ]);
+
+  mockGenerateSuggestions.mockImplementation((_, options) => {
+    options?.onSuccess?.(suggestionsMap);
+  });
+
+  mockSaveSuggestions.mockImplementation((_, options) => {
+    options?.onError?.();
+  });
+
+  render();
+
+  const weekStartInput = screen.getByLabelText(/Початок тижня/i) as HTMLInputElement;
+  const weekEndInput = screen.getByLabelText(/Кінець тижня/i) as HTMLInputElement;
+  const textInput = screen.getByRole('textbox', { name: /Текст плану/i }) as HTMLTextAreaElement;
+  const parseButton = screen.getByRole('button', { name: /Переглянути план/i });
+
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  act(() => {
+    fireEvent.change(weekStartInput, { target: { value: weekStart.toISOString().split('T')[0] } });
+    fireEvent.change(weekEndInput, { target: { value: weekEnd.toISOString().split('T')[0] } });
+  });
+  await user.type(
+    textInput,
+    `День 1
+1. Присідання зі штангою
+3 підходи по 8-12`
+  );
+
+  await waitFor(() => {
+    expect(parseButton).not.toBeDisabled();
+  });
+
+  await user.click(parseButton);
+
+  await waitFor(() => {
+    expect(screen.getByText(/Розпізнаний план/i)).toBeInTheDocument();
+  });
+
+  const saveButton = screen.getByRole('button', { name: /Зберегти та отримати AI підказки/i });
+  await user.click(saveButton);
+
+  await waitFor(() => {
+    expect(screen.getByText(/Помилка при збереженні плану/i)).toBeInTheDocument();
+  });
+});

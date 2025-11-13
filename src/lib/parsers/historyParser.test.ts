@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseHistoryWorkouts, getImportExample } from './historyParser';
+import { parseHistoryWorkouts, getImportExample, formatHistoryWorkout } from './historyParser';
 
 describe('parseHistoryWorkouts', () => {
   it('should parse a simple workout history', () => {
@@ -127,5 +127,61 @@ describe('getImportExample', () => {
   it('should contain day markers', () => {
     const example = getImportExample();
     expect(example).toMatch(/День \d+/);
+  });
+});
+
+describe('formatHistoryWorkout', () => {
+  it('formats workout with exercises and sets', () => {
+    const workout = parseHistoryWorkouts(
+      `Тиждень: 25.08.2024 - 31.08.2024
+
+День 1
+1. Присідання зі штангою – 3×8-12
+100 кг × 12
+100 кг × 10`
+    )[0];
+
+    const result = formatHistoryWorkout(workout);
+
+    expect(result).toContain('Присідання зі штангою');
+    expect(result).toContain('100 кг × 12');
+    expect(result).toContain('100 кг × 10');
+    expect(result).toContain('День 1');
+  });
+
+  it('formats workout with exercises without weight', () => {
+    const workout = parseHistoryWorkouts(
+      `Тиждень: 25.08.2024 - 31.08.2024
+
+День 1
+1. Віджимання від підлоги – 3×макс
+20
+18`
+    )[0];
+
+    const result = formatHistoryWorkout(workout);
+
+    expect(result).toContain('Віджимання від підлоги');
+    expect(result).toContain('20');
+    expect(result).toContain('18');
+    expect(result).not.toContain('кг ×');
+  });
+
+  it('formats multiple exercises', () => {
+    const workout = parseHistoryWorkouts(
+      `Тиждень: 25.08.2024 - 31.08.2024
+
+День 1
+1. Присідання зі штангою – 3×8-12
+100 кг × 12
+
+2. Жим ногами – 3×10-15
+150 кг × 15`
+    )[0];
+
+    const result = formatHistoryWorkout(workout);
+
+    expect(result).toContain('1. Присідання зі штангою');
+    expect(result).toContain('2. Жим ногами');
   });
 });

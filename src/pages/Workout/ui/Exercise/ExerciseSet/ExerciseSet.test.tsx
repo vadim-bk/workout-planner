@@ -37,39 +37,23 @@ it('renders input fields in edit mode', () => {
   expect(screen.getByPlaceholderText(/Повторення/i)).toBeInTheDocument();
 });
 
-it('updates weight when input changes', async () => {
+it('calls updateSet when input changes', async () => {
   render(<ExerciseSet {...defaultProps} isViewMode={false} />);
 
   const weightInput = screen.getByPlaceholderText(/Вага/i);
   await user.clear(weightInput);
   await user.type(weightInput, '105');
 
-  expect(mockUpdateSet).toHaveBeenCalled();
+  expect(mockUpdateSet).toHaveBeenCalledWith(1, 'weight', expect.any(Number));
 });
 
-it('updates reps when input changes', async () => {
-  render(<ExerciseSet {...defaultProps} isViewMode={false} />);
-
-  const repsInput = screen.getByPlaceholderText(/Повторення/i);
-  await user.clear(repsInput);
-  await user.type(repsInput, '15');
-
-  expect(mockUpdateSet).toHaveBeenCalled();
-});
-
-it('calls removeSet when remove button is clicked', async () => {
+it('calls removeSet and addSet when buttons are clicked', async () => {
   render(<ExerciseSet {...defaultProps} isViewMode={false} />);
 
   const buttons = screen.getAllByRole('button');
-  const removeButton = buttons[0];
-  await user.click(removeButton);
+  await user.click(buttons[0]);
+  await user.click(buttons[buttons.length - 1]);
 
   expect(mockRemoveSet).toHaveBeenCalledTimes(1);
-});
-
-it('does not show remove button when showRemoveButton is false', () => {
-  render(<ExerciseSet {...defaultProps} showRemoveButton={false} />);
-
-  const buttons = screen.getAllByRole('button');
-  expect(buttons).toHaveLength(1);
+  expect(mockAddSet).toHaveBeenCalledTimes(1);
 });

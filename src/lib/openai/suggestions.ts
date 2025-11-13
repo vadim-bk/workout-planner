@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import type { WeeklyPlan, WorkoutHistory, AISuggestion } from '@/types';
 
-function getOpenAIClient() {
+const getOpenAIClient = () => {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
   if (!apiKey || apiKey.trim() === '') {
@@ -14,12 +14,12 @@ function getOpenAIClient() {
     apiKey,
     dangerouslyAllowBrowser: true,
   });
-}
+};
 
-export async function generateWeightSuggestions(
+export const generateWeightSuggestions = async (
   newPlan: WeeklyPlan,
   workoutHistory: WorkoutHistory[]
-): Promise<Map<string, AISuggestion>> {
+): Promise<Map<string, AISuggestion>> => {
   const suggestions = new Map<string, AISuggestion>();
 
   // Format workout history for the prompt
@@ -93,67 +93,60 @@ ${newPlanText}
 
 ВАЖЛИВО: Кількість елементів у suggestedWeights та suggestedReps має точно відповідати кількості підходів у плані!`;
 
+  const openai = getOpenAIClient();
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: 'Ти - професійний тренер з фітнесу. Відповідай завжди українською мовою та тільки в JSON форматі.',
+      },
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ],
+    temperature: 0.7,
+    response_format: { type: 'json_object' },
+  });
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error('No response from OpenAI');
+  }
+
+  let result;
   try {
-    const openai = getOpenAIClient();
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'Ти - професійний тренер з фітнесу. Відповідай завжди українською мовою та тільки в JSON форматі.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      response_format: { type: 'json_object' },
+    result = JSON.parse(content);
+  } catch {
+    throw new Error('Invalid JSON response from OpenAI');
+  }
+
+  // Convert to Map of AISuggestions
+  if (result.suggestions && Array.isArray(result.suggestions)) {
+    result.suggestions.forEach((suggestion: any) => {
+      // Validate suggestion data
+      if (suggestion.exerciseName && suggestion.suggestedWeights && suggestion.suggestedReps) {
+        const aiSuggestion: AISuggestion = {
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          userId: newPlan.userId,
+          weekPlanId: newPlan.id,
+          exerciseName: suggestion.exerciseName,
+          suggestedWeights: suggestion.suggestedWeights || [],
+          suggestedReps: suggestion.suggestedReps || [],
+          reasoning: suggestion.reasoning || 'AI підказка на основі аналізу історії тренувань',
+          createdAt: new Date(),
+        };
+
+        suggestions.set(suggestion.exerciseName, aiSuggestion);
+      }
     });
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error('No response from OpenAI');
-    }
-
-    let result;
-    try {
-      result = JSON.parse(content);
-    } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', parseError);
-      console.error('Raw response:', content);
-      throw new Error('Invalid JSON response from OpenAI');
-    }
-
-    // Convert to Map of AISuggestions
-    if (result.suggestions && Array.isArray(result.suggestions)) {
-      result.suggestions.forEach((suggestion: any) => {
-        // Validate suggestion data
-        if (suggestion.exerciseName && suggestion.suggestedWeights && suggestion.suggestedReps) {
-          const aiSuggestion: AISuggestion = {
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            userId: newPlan.userId,
-            weekPlanId: newPlan.id,
-            exerciseName: suggestion.exerciseName,
-            suggestedWeights: suggestion.suggestedWeights || [],
-            suggestedReps: suggestion.suggestedReps || [],
-            reasoning: suggestion.reasoning || 'AI підказка на основі аналізу історії тренувань',
-            createdAt: new Date(),
-          };
-
-          suggestions.set(suggestion.exerciseName, aiSuggestion);
-        }
-      });
-    }
-  } catch (error) {
-    console.error('Error generating AI suggestions:', error);
-    throw error;
   }
 
   return suggestions;
-}
+};
 
-function formatWorkoutHistory(history: WorkoutHistory[]): string {
+export const formatWorkoutHistory = (history: WorkoutHistory[]): string => {
   if (history.length === 0) {
     return 'Історія тренувань відсутня. Це перший план користувача.';
   }
@@ -230,9 +223,9 @@ function formatWorkoutHistory(history: WorkoutHistory[]): string {
   });
 
   return formatted;
-}
+};
 
-function formatNewPlan(plan: WeeklyPlan): string {
+export const formatNewPlan = (plan: WeeklyPlan): string => {
   let formatted = `Тиждень: ${plan.weekStartDate.toLocaleDateString(
     'uk-UA'
   )} - ${plan.weekEndDate.toLocaleDateString('uk-UA')}\n\n`;
@@ -251,4 +244,4 @@ function formatNewPlan(plan: WeeklyPlan): string {
   });
 
   return formatted;
-}
+};

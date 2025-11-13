@@ -4,7 +4,7 @@ import type { CompletedExercise, DayWorkout, AISuggestion } from '@/types';
 import type { Dispatch, SetStateAction } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from '@/shared/ui';
 
-type Props = {
+export type ExerciseProps = {
   dayWorkout: DayWorkout | null;
   exercise: CompletedExercise;
   exerciseNumber: number;
@@ -28,7 +28,7 @@ export const Exercise = ({
   onSave,
   saving,
   saveSuccess,
-}: Props) => {
+}: ExerciseProps) => {
   const { exerciseId } = exercise;
 
   const suggestion = suggestions.get(exercise.name);

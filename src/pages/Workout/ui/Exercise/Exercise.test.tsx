@@ -1,66 +1,66 @@
-import { render, screen } from '@testing-library/react';
+import { screen, render as rtlRender } from '@testing-library/react';
 import user from '@testing-library/user-event';
 import { it, expect, vi } from 'vitest';
 import { Exercise } from './index';
+import type { ExerciseProps } from './index';
 import { createCompletedExercise, createDayWorkout, createAISuggestion } from '@/test/mock';
 
 const mockExercise = createCompletedExercise();
-const mockOnToggleEdit = vi.fn();
 
-const defaultProps = {
-  dayWorkout: createDayWorkout(1),
-  exercise: mockExercise,
-  exerciseNumber: 1,
-  isEditing: false,
-  suggestions: new Map(),
-  setCompletedExercises: vi.fn(),
-  onToggleEdit: mockOnToggleEdit,
-  onSave: vi.fn(),
-  saving: false,
-  saveSuccess: false,
+const render = (args: Partial<ExerciseProps> = {}) => {
+  rtlRender(
+    <Exercise
+      dayWorkout={args?.dayWorkout ?? createDayWorkout(1)}
+      exercise={args?.exercise ?? createCompletedExercise()}
+      exerciseNumber={1}
+      isEditing={args?.isEditing ?? false}
+      suggestions={args?.suggestions ?? new Map()}
+      setCompletedExercises={args?.setCompletedExercises ?? vi.fn()}
+      onToggleEdit={args?.onToggleEdit ?? vi.fn()}
+      onSave={args?.onSave ?? vi.fn()}
+      saving={args?.saving ?? false}
+      saveSuccess={args?.saveSuccess ?? false}
+    />
+  );
 };
 
-it('renders exercise name and details', () => {
-  render(<Exercise {...defaultProps} />);
-
+it('renders exercise name and sets', () => {
+  render();
   expect(screen.getByText(/1\. Присідання зі штангою/i)).toBeInTheDocument();
+  expect(screen.getAllByText(/100/i).length).toBeGreaterThan(0);
 });
 
-it('shows edit button when not editing', () => {
-  render(<Exercise {...defaultProps} />);
-
+it('shows edit button in view mode and save/cancel in edit mode', () => {
+  render();
   expect(screen.getByRole('button', { name: /Редагувати/i })).toBeInTheDocument();
-});
 
-it('shows save and cancel buttons when editing', () => {
-  render(<Exercise {...defaultProps} isEditing={true} />);
-
+  render({ isEditing: true });
   expect(screen.getByRole('button', { name: /Зберегти/i })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /Скасувати/i })).toBeInTheDocument();
 });
 
-it('calls onToggleEdit when edit button is clicked', async () => {
-  render(<Exercise {...defaultProps} />);
+it('calls callbacks when buttons are clicked', async () => {
+  const onToggleEdit = vi.fn();
+  const onSave = vi.fn();
 
-  const editButton = screen.getByRole('button', { name: /Редагувати/i });
-  await user.click(editButton);
+  render({ onToggleEdit, isEditing: true, onSave });
 
-  expect(mockOnToggleEdit).toHaveBeenCalledTimes(1);
+  await user.click(screen.getByRole('button', { name: /Зберегти/i }));
+  await user.click(screen.getByRole('button', { name: /Скасувати/i }));
+
+  expect(onSave).toHaveBeenCalledTimes(1);
+  expect(onToggleEdit).toHaveBeenCalledTimes(1);
 });
 
-it('displays AI suggestion reasoning when available', () => {
+it('displays AI suggestion when available', () => {
   const suggestion = createAISuggestion({ reasoning: 'Test reasoning' });
   const suggestions = new Map([[mockExercise.name, suggestion]]);
 
-  render(<Exercise {...defaultProps} suggestions={suggestions} />);
-
+  render({ suggestions });
   expect(screen.getByText(/Test reasoning/i)).toBeInTheDocument();
 });
 
-it('renders exercise sets', () => {
-  render(<Exercise {...defaultProps} />);
-
-  const sets = screen.getAllByText(/100/i);
-  expect(sets.length).toBeGreaterThan(0);
-  expect(screen.getAllByText(/12/i).length).toBeGreaterThan(0);
+it('disables save button when saving', () => {
+  render({ isEditing: true, saving: true });
+  expect(screen.getByRole('button', { name: /Зберегти/i })).toBeDisabled();
 });
